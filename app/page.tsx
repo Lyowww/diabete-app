@@ -1,0 +1,70 @@
+import { Activity, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
+
+import { DisclaimerCard } from "@/components/disclaimer-card";
+import { RiskAssessmentForm } from "@/components/risk-assessment-form";
+
+const highlights = [
+  {
+    title: "Guided multi-step flow",
+    copy: "Users move through short intake pages instead of one long form, which feels better on phones and first visits.",
+    icon: Activity,
+  },
+  {
+    title: "Gauge-style final result",
+    copy: "The last screen is a bold visual result page with a risk gauge, summary, and next-step recommendations.",
+    icon: Stethoscope,
+  },
+  {
+    title: "Built for Vercel",
+    copy: "Next.js App Router, server-side prediction calls, and no client-exposed secrets.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Fast preview experience",
+    copy: "The app includes a demo predictor so local development and preview deploys still work well.",
+    icon: Sparkles,
+  },
+];
+
+export default function HomePage() {
+  return (
+    <main className="relative overflow-hidden">
+      <div className="subtle-grid pointer-events-none absolute inset-0 opacity-60" />
+
+      <section className="relative mx-auto max-w-7xl px-6 pb-12 pt-10 sm:px-8 lg:px-10 lg:pb-16 lg:pt-16">
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-1.5 text-sm text-cyan-100">
+            Secure step-by-step diabetes screening
+          </div>
+          <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Diabetes risk prediction with a guided mobile flow and a visual final result.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+            DiaVision now walks users through a structured step-by-step intake, then lands them on a clear
+            gauge-style risk screen your team can connect to a real prediction service without rebuilding the UI.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-4">
+          {highlights.map(({ copy, icon: Icon, title }) => (
+            <div key={title} className="glass-card rounded-[28px] p-5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-200">
+                <Icon className="h-5 w-5" />
+              </div>
+              <h2 className="mt-4 text-lg font-semibold text-white">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{copy}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="relative mx-auto max-w-7xl px-6 pb-16 sm:px-8 lg:px-10 lg:pb-24">
+        <div className="mb-6">
+          <DisclaimerCard body="This app is designed for screening support and education. It does not provide a diagnosis, emergency guidance, or a substitute for clinician-led testing." />
+        </div>
+
+        <RiskAssessmentForm />
+      </section>
+    </main>
+  );
+}
