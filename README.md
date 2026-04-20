@@ -112,3 +112,4 @@ If you do not set `PREDICTION_API_URL`, preview and production deployments will 
 ## Medical note
 
 This project is an educational screening interface, not a diagnostic medical device. Any elevated result should be confirmed with a licensed clinician and formal lab testing.
+# diabete-app
