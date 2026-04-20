@@ -37,7 +37,7 @@ export default function HomePage() {
             Secure step-by-step diabetes screening
           </div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Diabetes risk prediction powered by the supplied Python model and a guided mobile flow.
+            Diabetes risk prediction  ero powered by the supplied Python model and a guided mobile flow.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
             DiaVision now walks users through the exact measurements used by the underlying Pima-based logistic model,
