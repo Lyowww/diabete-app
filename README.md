@@ -2,6 +2,8 @@
 
 DiaVision is a diabetes risk predictor built with Next.js App Router, TypeScript, Tailwind CSS, and a server-side prediction adapter. It now ships with an embedded port of the supplied Python Pima-based logistic model, so the app can produce real predictions even before a separate external API is connected.
 
+For a fuller client-facing explanation of the project structure, file roles, and end-to-end functionality, see `CLIENT_DOCUMENTATION.md`.
+
 ## Features
 
 - Mobile-first diabetes risk questionnaire aligned to the real model inputs

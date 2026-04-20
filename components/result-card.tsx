@@ -1,29 +1,83 @@
-import { Activity, ArrowRight, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
+import { Activity, ArrowRight, CheckCircle2, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
 
 import { RiskGauge } from "@/components/risk-gauge";
 import { cn, formatPercent } from "@/lib/utils";
-import type { PredictionResult, RiskLevel } from "@/types/prediction";
+import type { ContributorImpact, PredictionResult, RiskLevel } from "@/types/prediction";
 
 const riskPalette: Record<
   RiskLevel,
   {
     badge: string;
+    badgeShadow: string;
+    accent: string;
+    glowBg: string;
     title: string;
   }
 > = {
   low: {
-    badge: "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20",
+    badge: "bg-emerald-400/15 text-emerald-300 ring-1 ring-emerald-400/30",
+    badgeShadow: "shadow-[0_0_24px_rgba(52,211,153,0.35)]",
+    accent: "text-emerald-300",
+    glowBg: "rgba(52,211,153,0.07)",
     title: "Lower current risk profile",
   },
   moderate: {
-    badge: "bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20",
+    badge: "bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/30",
+    badgeShadow: "shadow-[0_0_24px_rgba(251,191,36,0.35)]",
+    accent: "text-amber-300",
+    glowBg: "rgba(251,191,36,0.07)",
     title: "Moderate current risk profile",
   },
   high: {
-    badge: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20",
+    badge: "bg-rose-400/15 text-rose-300 ring-1 ring-rose-400/30",
+    badgeShadow: "shadow-[0_0_24px_rgba(251,113,133,0.35)]",
+    accent: "text-rose-300",
+    glowBg: "rgba(251,113,133,0.07)",
     title: "Higher current risk profile",
   },
 };
+
+const impactConfig: Record<
+  ContributorImpact,
+  { label: string; badge: string; bars: number; barColor: string }
+> = {
+  strong: {
+    label: "Strong",
+    badge: "bg-rose-400/15 text-rose-300 ring-1 ring-rose-400/25",
+    bars: 3,
+    barColor: "bg-rose-400",
+  },
+  elevated: {
+    label: "Elevated",
+    badge: "bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/25",
+    bars: 2,
+    barColor: "bg-amber-400",
+  },
+  watch: {
+    label: "Watch",
+    badge: "bg-cyan-400/15 text-cyan-300 ring-1 ring-cyan-400/25",
+    bars: 1,
+    barColor: "bg-cyan-400",
+  },
+};
+
+function ImpactBars({ impact }: { impact: ContributorImpact }) {
+  const { bars, barColor } = impactConfig[impact];
+
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className={cn(
+            "h-1.5 w-5 rounded-full transition-all",
+            i <= bars ? barColor : "bg-white/10",
+          )}
+        />
+      ))}
+    </div>
+  );
+}
 
 type ResultCardProps = {
   result: PredictionResult | null;
@@ -34,13 +88,13 @@ type ResultCardProps = {
 function Placeholder() {
   return (
     <div className="space-y-4 rounded-[28px] border border-white/10 bg-white/5 p-6">
-      <div className="flex items-center gap-3 text-cyan-200">
+      <div className="flex items-center gap-3 text-cyan-300">
         <Sparkles className="h-5 w-5" />
         <p className="font-medium">Your risk snapshot will appear here.</p>
       </div>
       <p className="text-sm leading-6 text-slate-300">
-        Fill out the assessment to see a probability estimate, the biggest contributors, and follow-up
-        suggestions you can take into a clinical conversation.
+        Fill out the assessment to see a probability estimate, the biggest contributors, and follow-up suggestions you
+        can take into a clinical conversation.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {[
@@ -101,71 +155,100 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-[36px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.16)] sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      {/* ── Main result header card ─────────────────────────── */}
+      <div className="animate-fade-in-up relative overflow-hidden rounded-[36px] border border-white/[0.08] bg-gradient-to-b from-slate-900/80 to-slate-950/95 p-5 shadow-[0_32px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:p-6">
+        {/* Risk-level ambient glow */}
+        <div
+          className="pointer-events-none absolute -right-12 -top-16 h-72 w-72 rounded-full blur-3xl"
+          style={{ background: `radial-gradient(circle, ${palette.glowBg} 0%, transparent 70%)` }}
+        />
+        <div
+          className="pointer-events-none absolute -left-8 bottom-0 h-48 w-48 rounded-full blur-3xl"
+          style={{ background: `radial-gradient(circle, rgba(34,211,238,0.05) 0%, transparent 70%)` }}
+        />
+
+        {/* Header row */}
+        <div className="relative flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.24em] text-cyan-700">Final result</p>
-            <h3 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-              {palette.title}
-            </h3>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              This last screen is designed as a clear screening snapshot so users can understand their result
-              immediately on mobile or desktop.
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">Final result</p>
+            <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{palette.title}</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+              Predicted probability, risk tier, and the strongest drivers from the model.
             </p>
           </div>
-          <span className={cn("rounded-full px-3 py-1 text-sm font-medium", palette.badge)}>
+          <span
+            className={cn(
+              "animate-glow-pulse rounded-full px-3.5 py-1.5 text-sm font-semibold uppercase tracking-[0.18em]",
+              palette.badge,
+              palette.badgeShadow,
+            )}
+          >
             {result.riskLevel}
           </span>
         </div>
 
+        {/* Gauge */}
         <div className="mt-6">
           <RiskGauge probability={result.probability} riskLevel={result.riskLevel} />
         </div>
 
+        {/* Stat tiles */}
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[28px] border border-slate-200 bg-slate-50 px-4 py-4">
+          <div className="animate-scale-in delay-100 rounded-[24px] border border-white/[0.07] bg-slate-950/60 px-4 py-4 transition hover:border-white/[0.12]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Probability</p>
-            <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
+            <p className={cn("mt-3 text-3xl font-bold tracking-tight", palette.accent)}>
               {formatPercent(result.probability)}
             </p>
           </div>
-          <div className="rounded-[28px] border border-slate-200 bg-slate-50 px-4 py-4">
+          <div className="animate-scale-in delay-200 rounded-[24px] border border-white/[0.07] bg-slate-950/60 px-4 py-4 transition hover:border-white/[0.12]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Confidence</p>
-            <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-3 text-3xl font-bold tracking-tight text-white">
               {formatPercent(result.confidence)}
             </p>
           </div>
-          <div className="rounded-[28px] border border-slate-200 bg-slate-50 px-4 py-4">
+          <div className="animate-scale-in delay-300 rounded-[24px] border border-white/[0.07] bg-slate-950/60 px-4 py-4 transition hover:border-white/[0.12]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Score</p>
-            <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
+            <p className="mt-3 text-3xl font-bold tracking-tight text-white">
               {result.score.toFixed(0)}
-              <span className="ml-1 text-base font-medium text-slate-500">/ {result.maxScore.toFixed(0)}</span>
+              <span className="ml-1.5 text-base font-medium text-slate-500">/ {result.maxScore.toFixed(0)}</span>
             </p>
           </div>
         </div>
       </div>
 
+      {/* ── Detail grid ─────────────────────────────────────── */}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.95fr)]">
+        {/* Left column */}
         <div className="space-y-4">
-          <div className="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
-            <div className="flex items-center gap-2 text-cyan-700">
-              <Activity className="h-5 w-5" />
-              <p className="font-medium">Clinical-style summary</p>
+          {/* Clinical summary */}
+          <div className="animate-fade-in-up delay-200 rounded-[32px] border border-white/[0.08] bg-gradient-to-b from-slate-900/70 to-slate-950/80 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+            <div className="flex items-center gap-2.5 text-cyan-300">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
+                <Activity className="h-4 w-4" />
+              </div>
+              <p className="font-medium text-white">Clinical-style summary</p>
             </div>
-            <p className="mt-3 text-sm leading-7 text-slate-600">{result.summary}</p>
+            <p className="mt-4 text-sm leading-7 text-slate-300">{result.summary}</p>
           </div>
 
-          <div className="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
-            <div className="flex items-center gap-2 text-cyan-700">
-              <ArrowRight className="h-5 w-5" />
-              <p className="font-medium">Recommended next steps</p>
+          {/* Recommended actions */}
+          <div className="animate-fade-in-up delay-300 rounded-[32px] border border-white/[0.08] bg-gradient-to-b from-slate-900/70 to-slate-950/80 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
+                <ArrowRight className="h-4 w-4 text-cyan-300" />
+              </div>
+              <p className="font-medium text-white">Recommended next steps</p>
             </div>
-            <div className="mt-4 grid gap-3">
-              {result.recommendedActions.map((action) => (
+            <div className="mt-4 grid gap-2.5">
+              {result.recommendedActions.map((action, i) => (
                 <div
                   key={action}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700"
+                  className={cn(
+                    "animate-slide-in-left flex items-start gap-3 rounded-2xl border border-white/[0.07] bg-slate-950/50 px-4 py-3 text-sm leading-6 text-slate-300 transition hover:border-white/[0.12] hover:bg-white/[0.03]",
+                    i === 0 ? "delay-400" : i === 1 ? "delay-500" : "delay-600",
+                  )}
                 >
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400/60" />
                   {action}
                 </div>
               ))}
@@ -173,48 +256,61 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
           </div>
         </div>
 
+        {/* Right column */}
         <div className="space-y-4">
-          <div className="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
-            <div className="flex items-center gap-2 text-cyan-700">
-              <ShieldCheck className="h-5 w-5" />
-              <p className="font-medium">Biggest contributors</p>
+          {/* Contributors */}
+          <div className="animate-fade-in-up delay-200 rounded-[32px] border border-white/[0.08] bg-gradient-to-b from-slate-900/70 to-slate-950/80 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
+                <ShieldCheck className="h-4 w-4 text-cyan-300" />
+              </div>
+              <p className="font-medium text-white">Biggest contributors</p>
             </div>
             <div className="mt-4 grid gap-3">
-              {result.contributors.map((contributor) => (
-                <div
-                  key={contributor.label}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="font-medium text-slate-900">{contributor.label}</p>
-                    <span
-                      className={cn(
-                        "rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em]",
-                        contributor.impact === "strong"
-                          ? "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20"
-                          : contributor.impact === "elevated"
-                            ? "bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20"
-                            : "bg-cyan-500/10 text-cyan-700 ring-1 ring-cyan-500/20",
-                      )}
-                    >
-                      {contributor.impact}
-                    </span>
+              {result.contributors.map((contributor, i) => {
+                const cfg = impactConfig[contributor.impact];
+
+                return (
+                  <div
+                    key={contributor.label}
+                    className={cn(
+                      "animate-scale-in rounded-2xl border border-white/[0.07] bg-slate-950/50 px-4 py-4 transition hover:border-white/[0.12] hover:bg-white/[0.03]",
+                      i === 0 ? "delay-300" : i === 1 ? "delay-400" : "delay-500",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="font-medium text-white">{contributor.label}</p>
+                      <span
+                        className={cn(
+                          "rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.18em]",
+                          cfg.badge,
+                        )}
+                      >
+                        {cfg.label}
+                      </span>
+                    </div>
+                    <div className="mt-2.5">
+                      <ImpactBars impact={contributor.impact} />
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-400">{contributor.detail}</p>
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{contributor.detail}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          <div className="rounded-[32px] border border-slate-200/80 bg-white/90 p-5 text-sm leading-6 text-slate-600 shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
-            <div className="flex items-center gap-2 text-cyan-700">
-              <Sparkles className="h-5 w-5" />
-              <p className="font-medium">Provider details</p>
+          {/* Provider details */}
+          <div className="animate-fade-in-up delay-400 rounded-[32px] border border-white/[0.08] bg-gradient-to-b from-slate-900/70 to-slate-950/80 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
+                <Sparkles className="h-4 w-4 text-cyan-300" />
+              </div>
+              <p className="font-medium text-white">Provider details</p>
             </div>
-            <p className="mt-3">
-              <span className="font-medium text-slate-900">Provider:</span> {result.provider}
+            <p className="mt-4 text-sm leading-6 text-slate-400">
+              <span className="font-medium text-slate-200">Provider:</span> {result.provider}
             </p>
-            <p className="mt-2">{result.disclaimer}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">{result.disclaimer}</p>
           </div>
         </div>
       </div>

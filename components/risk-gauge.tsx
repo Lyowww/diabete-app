@@ -1,4 +1,8 @@
-import { cn, formatPercent } from "@/lib/utils";
+"use client";
+
+import { useEffect, useId, useRef, useState } from "react";
+
+import { formatPercent } from "@/lib/utils";
 import type { RiskLevel } from "@/types/prediction";
 
 type RiskGaugeProps = {
@@ -6,70 +10,113 @@ type RiskGaugeProps = {
   riskLevel: RiskLevel;
 };
 
-const arcColors = [
-  "#84cc16",
-  "#9fd232",
-  "#b7d84a",
-  "#cfd15a",
-  "#e0c84d",
-  "#eabf45",
-  "#f0b347",
-  "#eea13f",
-  "#eb8f3b",
-  "#e57a36",
-  "#e66235",
-  "#e34e31",
-  "#df3f31",
-  "#dc2626",
+const segmentColors = [
+  "#22d3ee",
+  "#2dd4bf",
+  "#34d399",
+  "#6ee7b7",
+  "#a3e635",
+  "#d9f99d",
+  "#facc15",
+  "#fbbf24",
+  "#fb923c",
+  "#f97316",
+  "#fb7185",
+  "#f43f5e",
 ] as const;
 
 const riskTone: Record<
   RiskLevel,
-  {
-    badge: string;
-    label: string;
-  }
+  { accent: string; glow: string; label: string; pillFill: string; pillStroke: string }
 > = {
   low: {
-    badge: "bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20",
-    label: "Low risk",
+    accent: "#2dd4bf",
+    glow: "rgba(45,212,191,0.18)",
+    label: "risk",
+    pillFill: "rgba(45,212,191,0.14)",
+    pillStroke: "rgba(45,212,191,0.36)",
   },
   moderate: {
-    badge: "bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20",
-    label: "Middle risk",
+    accent: "#f59e0b",
+    glow: "rgba(245,158,11,0.16)",
+    label: "risk",
+    pillFill: "rgba(245,158,11,0.14)",
+    pillStroke: "rgba(245,158,11,0.34)",
   },
   high: {
-    badge: "bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/20",
-    label: "High risk",
+    accent: "#f43f5e",
+    glow: "rgba(244,63,94,0.16)",
+    label: "risk",
+    pillFill: "rgba(244,63,94,0.14)",
+    pillStroke: "rgba(244,63,94,0.34)",
   },
 };
 
-function pointOnArc(centerX: number, centerY: number, radius: number, angle: number) {
-  const radians = (angle * Math.PI) / 180;
+const CENTER_X = 210;
+const CENTER_Y = 192;
+const ARC_RADIUS = 114;
+const HUB_RADIUS = 70;
+const SEGMENT_GAP = 3.2;
+
+function pointOnArc(cx: number, cy: number, r: number, angleDeg: number) {
+  const radians = (angleDeg * Math.PI) / 180;
 
   return {
-    x: centerX + radius * Math.cos(radians),
-    y: centerY - radius * Math.sin(radians),
+    x: cx + r * Math.cos(radians),
+    y: cy - r * Math.sin(radians),
   };
 }
 
-function describeArc(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number) {
-  const start = pointOnArc(centerX, centerY, radius, startAngle);
-  const end = pointOnArc(centerX, centerY, radius, endAngle);
-  const largeArcFlag = Math.abs(startAngle - endAngle) > 180 ? 1 : 0;
+function describeArc(cx: number, cy: number, r: number, startDeg: number, endDeg: number) {
+  const start = pointOnArc(cx, cy, r, startDeg);
+  const end = pointOnArc(cx, cy, r, endDeg);
+  const largeArcFlag = Math.abs(startDeg - endDeg) > 180 ? 1 : 0;
 
-  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
+  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
 }
 
 export function RiskGauge({ probability, riskLevel }: RiskGaugeProps) {
-  const clampedProbability = Math.min(1, Math.max(0, probability));
-  const centerX = 180;
-  const centerY = 170;
-  const arcRadius = 118;
-  const sweepPerSegment = 180 / arcColors.length;
-  const gap = 2.2;
-  const angle = 180 - clampedProbability * 180;
-  const radians = (angle * Math.PI) / 180;
+  const [displayProbability, setDisplayProbability] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const displayProbabilityRef = useRef(0);
+  const idPrefix = useId().replace(/:/g, "");
+
+  useEffect(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    const startTime = performance.now();
+    const from = displayProbabilityRef.current;
+    const target = Math.min(1, Math.max(0, probability));
+    const duration = 1250;
+
+    const animate = (now: number) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const nextValue = from + (target - from) * eased;
+
+      displayProbabilityRef.current = nextValue;
+      setDisplayProbability(nextValue);
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, [probability]);
+
+  const tone = riskTone[riskLevel];
+  const segmentSweep = 180 / segmentColors.length;
+  const angleDeg = 180 - displayProbability * 180;
+  const radians = (angleDeg * Math.PI) / 180;
   const direction = {
     x: Math.cos(radians),
     y: -Math.sin(radians),
@@ -78,85 +125,169 @@ export function RiskGauge({ probability, riskLevel }: RiskGaugeProps) {
     x: -direction.y,
     y: direction.x,
   };
-  const tip = {
-    x: centerX + direction.x * 110,
-    y: centerY + direction.y * 110,
+  const tip = pointOnArc(CENTER_X, CENTER_Y, ARC_RADIUS - 14, angleDeg);
+  const baseCenter = {
+    x: CENTER_X + direction.x * 6,
+    y: CENTER_Y + direction.y * 6,
   };
   const leftBase = {
-    x: centerX + perpendicular.x * 11,
-    y: centerY + perpendicular.y * 11,
+    x: baseCenter.x + perpendicular.x * 24,
+    y: baseCenter.y + perpendicular.y * 24,
   };
   const rightBase = {
-    x: centerX - perpendicular.x * 11,
-    y: centerY - perpendicular.y * 11,
+    x: baseCenter.x - perpendicular.x * 24,
+    y: baseCenter.y - perpendicular.y * 24,
   };
-  const tone = riskTone[riskLevel];
+  const shadowOffset = { x: 10, y: 12 };
+
+  const hubGradientId = `${idPrefix}-hub-gradient`;
+  const ringGradientId = `${idPrefix}-ring-gradient`;
+  const needleGradientId = `${idPrefix}-needle-gradient`;
+  const blurFilterId = `${idPrefix}-blur-filter`;
+  const needleShadowId = `${idPrefix}-needle-shadow`;
+  const hubGlowId = `${idPrefix}-hub-glow`;
 
   return (
-    <div className="relative overflow-hidden rounded-[36px] border border-slate-200/80 bg-[radial-gradient(circle_at_top,#ffffff_0%,#f8fafc_48%,#e5e7eb_100%)] px-4 pb-8 pt-5 shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-6 sm:pt-6">
-      <div className="absolute bottom-4 left-[58%] h-48 w-32 -translate-x-1/2 rotate-[45deg] rounded-full bg-black/10 blur-2xl" />
-      <div className="absolute bottom-5 left-1/2 h-24 w-56 -translate-x-1/2 rounded-full bg-black/12 blur-3xl" />
+    <div className="animate-fade-in-up relative mx-auto w-full max-w-[34rem] overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16)_0%,rgba(15,23,42,0.94)_34%,rgba(2,6,23,0.98)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_60px_rgba(2,6,23,0.45)] sm:p-5">
+      <div className="pointer-events-none absolute inset-x-8 top-2 h-24 rounded-full bg-cyan-300/10 blur-3xl animate-glow-pulse" />
+      <div
+        className="pointer-events-none absolute bottom-4 left-1/2 h-20 w-44 -translate-x-1/2 rounded-full blur-3xl animate-glow-pulse"
+        style={{ background: tone.glow }}
+      />
 
-      <div className="pointer-events-none absolute left-4 top-[54%] text-2xl font-semibold text-slate-700 sm:left-7 sm:text-[3rem]">
-        Low
-      </div>
-      <div className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 text-2xl font-semibold text-slate-700 sm:text-[3rem]">
-        Middle
-      </div>
-      <div className="pointer-events-none absolute right-4 top-[54%] text-2xl font-semibold text-slate-700 sm:right-7 sm:text-[3rem]">
-        High
-      </div>
+      <svg aria-hidden="true" className="relative z-[1] block w-full" viewBox="0 0 420 280">
+        <defs>
+          <linearGradient id={ringGradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#64748b" />
+            <stop offset="50%" stopColor="#334155" />
+            <stop offset="100%" stopColor="#0f172a" />
+          </linearGradient>
+          <radialGradient id={hubGradientId} cx="34%" cy="28%" r="80%">
+            <stop offset="0%" stopColor="#1e293b" />
+            <stop offset="45%" stopColor="#0f172a" />
+            <stop offset="100%" stopColor="#020617" />
+          </radialGradient>
+          <linearGradient id={needleGradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#f8fafc" />
+            <stop offset="35%" stopColor="#cbd5e1" />
+            <stop offset="100%" stopColor="#64748b" />
+          </linearGradient>
+          <filter id={blurFilterId} x="-20%" y="-20%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="18" />
+          </filter>
+          <filter id={needleShadowId} x="-20%" y="-20%" width="160%" height="160%">
+            <feDropShadow dx="2" dy="5" stdDeviation="5" floodColor="#020617" floodOpacity="0.4" />
+          </filter>
+          <filter id={hubGlowId} x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="14" />
+          </filter>
+        </defs>
 
-      <svg
-        aria-hidden="true"
-        className="relative z-[1] mx-auto block w-full max-w-[520px]"
-        viewBox="0 0 360 260"
-      >
-        {arcColors.map((color, index) => {
-          const startAngle = 180 - index * sweepPerSegment - gap / 2;
-          const endAngle = 180 - (index + 1) * sweepPerSegment + gap / 2;
+        <ellipse
+          cx="284"
+          cy="232"
+          rx="112"
+          ry="54"
+          fill="rgba(2,6,23,0.5)"
+          filter={`url(#${blurFilterId})`}
+          transform="rotate(37 284 232)"
+        />
+
+        <path
+          d={describeArc(CENTER_X, CENTER_Y, ARC_RADIUS, 180, 0)}
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="22"
+          strokeLinecap="butt"
+        />
+
+        {segmentColors.map((color, index) => {
+          const startDeg = 180 - index * segmentSweep - SEGMENT_GAP / 2;
+          const endDeg = 180 - (index + 1) * segmentSweep + SEGMENT_GAP / 2;
+          const activeProgress = Math.max(0, Math.min(1, displayProbability * segmentColors.length - index));
 
           return (
-            <path
-              key={`${color}-${index}`}
-              d={describeArc(centerX, centerY, arcRadius, startAngle, endAngle)}
-              fill="none"
-              stroke={color}
-              strokeLinecap="round"
-              strokeWidth="16"
-            />
+            <g key={`${color}-${index}`}>
+              <path
+                d={describeArc(CENTER_X, CENTER_Y, ARC_RADIUS, startDeg, endDeg)}
+                fill="none"
+                opacity="0.34"
+                stroke={color}
+                strokeLinecap="butt"
+                strokeWidth="20"
+              />
+              <path
+                d={describeArc(CENTER_X, CENTER_Y, ARC_RADIUS, startDeg, endDeg)}
+                fill="none"
+                opacity={activeProgress * 0.9}
+                stroke={color}
+                strokeLinecap="butt"
+                strokeWidth="24"
+              />
+              <path
+                d={describeArc(CENTER_X, CENTER_Y, ARC_RADIUS, startDeg, endDeg)}
+                fill="none"
+                opacity={0.42 + activeProgress * 0.58}
+                stroke={color}
+                strokeLinecap="butt"
+                strokeWidth="20"
+              />
+            </g>
           );
         })}
 
+        <text fill="#cbd5e1" fontSize="28" fontWeight="700" textAnchor="end" x="74" y="194">
+          Low
+        </text>
+        <text fill="#e2e8f0" fontSize="26" fontWeight="700" textAnchor="middle" x="210" y="50">
+          Middle
+        </text>
+        <text fill="#cbd5e1" fontSize="28" fontWeight="700" textAnchor="start" x="346" y="194">
+          High
+        </text>
+
         <polygon
-          fill="#4b5563"
-          opacity="0.92"
+          fill="rgba(2,6,23,0.26)"
+          points={`${leftBase.x + shadowOffset.x},${leftBase.y + shadowOffset.y} ${tip.x + shadowOffset.x},${tip.y + shadowOffset.y} ${rightBase.x + shadowOffset.x},${rightBase.y + shadowOffset.y}`}
+        />
+        <polygon
+          filter={`url(#${needleShadowId})`}
+          fill={`url(#${needleGradientId})`}
           points={`${leftBase.x},${leftBase.y} ${tip.x},${tip.y} ${rightBase.x},${rightBase.y}`}
         />
-        <circle cx={centerX} cy={centerY} fill="#52525b" r="16" />
-        <circle cx={centerX} cy={centerY} fill="#d4d4d8" r="7" />
+
+        <circle cx={CENTER_X} cy={CENTER_Y} fill={tone.glow} filter={`url(#${hubGlowId})`} r={HUB_RADIUS + 24} />
+        <circle cx={CENTER_X} cy={CENTER_Y} fill={`url(#${ringGradientId})`} r={HUB_RADIUS + 10} />
+        <circle cx={CENTER_X} cy={CENTER_Y} fill={`url(#${hubGradientId})`} r={HUB_RADIUS} />
+        <ellipse cx="190" cy="162" fill="rgba(255,255,255,0.08)" rx="42" ry="22" />
+        <circle cx={CENTER_X} cy={CENTER_Y} fill="none" r={HUB_RADIUS - 2} stroke="rgba(255,255,255,0.05)" strokeWidth="1.5" />
+
+        
+        <text
+          fill="#ffffff"
+          fontSize="40"
+          fontWeight="700"
+          letterSpacing="0.4"
+          textAnchor="middle"
+          x={CENTER_X}
+          y="192"
+        >
+          {formatPercent(displayProbability)}
+        </text>
+        <rect
+          fill={tone.pillFill}
+          height="24"
+          rx="12"
+          stroke={tone.pillStroke}
+          strokeWidth="1"
+          width="110"
+          x={CENTER_X - 55}
+          y="203"
+        />
+        <text fill={tone.accent} fontSize="12" fontWeight="700" letterSpacing="1" textAnchor="middle" x={CENTER_X} y="219">
+          {tone.label.toUpperCase()}
+        </text>
       </svg>
-
-      <div className="absolute left-1/2 top-[61%] z-[2] flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[radial-gradient(circle_at_32%_24%,#2f2f35_0%,#19191d_45%,#09090b_100%)] shadow-[0_24px_50px_rgba(0,0,0,0.4)] ring-8 ring-black/10 sm:h-44 sm:w-44">
-        <div className="text-center text-white">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/55 sm:text-xs">
-            Estimated
-          </p>
-          <p className="mt-1 text-3xl font-semibold tracking-tight sm:text-5xl">
-            {formatPercent(clampedProbability)}
-          </p>
-          <p className="mt-2 text-xl font-semibold uppercase tracking-[0.2em] sm:text-[2.5rem]">Risk</p>
-        </div>
-      </div>
-
-      <div
-        className={cn(
-          "absolute bottom-4 left-1/2 z-[3] -translate-x-1/2 rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.22em] shadow-sm sm:text-base",
-          tone.badge,
-        )}
-      >
-        {tone.label}
-      </div>
     </div>
   );
 }
