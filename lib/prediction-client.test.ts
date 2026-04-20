@@ -6,16 +6,14 @@ import { generatePrediction } from "@/lib/prediction-client";
 import type { RiskAssessmentInput } from "@/types/prediction";
 
 const sampleInput: RiskAssessmentInput = {
-  age: 58,
-  biologicalSex: "female",
+  pregnancies: 4,
+  glucose: 156,
+  bloodPressure: 88,
+  skinThickness: 32,
+  insulin: 180,
   bmi: 31.8,
-  familyHistory: true,
-  hypertension: true,
-  activityLevel: "low",
-  glucoseHistory: "borderline",
-  smokingStatus: "former",
-  sleepHours: 5.5,
-  gestationalDiabetes: false,
+  diabetesPedigreeFunction: 0.74,
+  age: 58,
 };
 
 const envKeys = [
@@ -36,11 +34,11 @@ afterEach(() => {
 });
 
 describe("generatePrediction", () => {
-  it("falls back to the demo predictor when no external URL is configured", async () => {
+  it("falls back to the embedded Pima model when no external URL is configured", async () => {
     const result = await generatePrediction(sampleInput);
 
-    expect(result.providerMode).toBe("demo");
-    expect(result.provider).toBe("Built-in demo predictor");
+    expect(result.providerMode).toBe("embedded");
+    expect(result.provider).toBe("Embedded Pima logistic model");
     expect(result.probability).toBeGreaterThan(0);
     expect(result.contributors.length).toBeGreaterThan(0);
   });

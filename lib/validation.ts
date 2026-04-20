@@ -2,32 +2,32 @@ import { z } from "zod";
 
 export const riskAssessmentSchema = z
   .object({
+    pregnancies: z
+      .number()
+      .int()
+      .min(0, "Pregnancies cannot be negative.")
+      .max(20, "Pregnancy count must be 20 or below."),
+    glucose: z.number().min(1, "Glucose must be greater than 0.").max(300, "Glucose looks too high."),
+    bloodPressure: z
+      .number()
+      .min(1, "Blood pressure must be greater than 0.")
+      .max(250, "Blood pressure looks too high."),
+    skinThickness: z
+      .number()
+      .min(0, "Skin thickness cannot be negative.")
+      .max(100, "Skin thickness looks too high."),
+    insulin: z.number().min(0, "Insulin cannot be negative.").max(1000, "Insulin looks too high."),
+    diabetesPedigreeFunction: z
+      .number()
+      .min(0, "Diabetes pedigree function cannot be negative.")
+      .max(3, "Diabetes pedigree function looks too high."),
     age: z.number().int().min(18, "Age must be at least 18.").max(120, "Age looks too high."),
-    biologicalSex: z.enum(["female", "male", "another"]),
     bmi: z
       .number()
-      .min(15, "BMI must be at least 15.")
-      .max(60, "BMI must be 60 or below."),
-    familyHistory: z.boolean(),
-    hypertension: z.boolean(),
-    activityLevel: z.enum(["low", "moderate", "high"]),
-    glucoseHistory: z.enum(["normal", "borderline", "high"]),
-    smokingStatus: z.enum(["never", "former", "current"]),
-    sleepHours: z
-      .number()
-      .min(4, "Sleep should be at least 4 hours.")
-      .max(12, "Sleep should be 12 hours or less."),
-    gestationalDiabetes: z.boolean(),
+      .min(1, "BMI must be greater than 0.")
+      .max(80, "BMI must be 80 or below."),
   })
-  .superRefine((value, ctx) => {
-    if (value.biologicalSex !== "female" && value.gestationalDiabetes) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["gestationalDiabetes"],
-        message: "Gestational diabetes should only be marked if pregnancy history applies.",
-      });
-    }
-  });
+  .strict();
 
 export const predictionRequestSchema = z.object({
   input: riskAssessmentSchema,

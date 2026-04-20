@@ -46,7 +46,7 @@ function Placeholder() {
         {[
           "Server-side prediction requests",
           "Clear risk categories and next steps",
-          "Preview-safe demo mode without secrets",
+          "Embedded model when no external API is set",
           "No health answers stored in this app",
         ].map((item) => (
           <div

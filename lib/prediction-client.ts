@@ -1,6 +1,6 @@
 import "server-only";
 
-import { buildMockPrediction, normalizeExternalPrediction } from "@/lib/risk-engine";
+import { buildEmbeddedPrediction, normalizeExternalPrediction } from "@/lib/risk-engine";
 import type { PredictionResult, RiskAssessmentInput } from "@/types/prediction";
 
 const DEFAULT_TIMEOUT_MS = 8_000;
@@ -44,7 +44,7 @@ export async function generatePrediction(input: RiskAssessmentInput): Promise<Pr
   const apiUrl = process.env.PREDICTION_API_URL;
 
   if (!apiUrl) {
-    return buildMockPrediction(input);
+    return buildEmbeddedPrediction(input);
   }
 
   const controller = new AbortController();

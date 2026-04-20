@@ -5,8 +5,8 @@ import { RiskAssessmentForm } from "@/components/risk-assessment-form";
 
 const highlights = [
   {
-    title: "Guided multi-step flow",
-    copy: "Users move through short intake pages instead of one long form, which feels better on phones and first visits.",
+    title: "Model-aligned intake flow",
+    copy: "The questionnaire now collects the eight measurements used by the supplied Python model instead of proxy lifestyle inputs.",
     icon: Activity,
   },
   {
@@ -15,13 +15,13 @@ const highlights = [
     icon: Stethoscope,
   },
   {
-    title: "Built for Vercel",
-    copy: "Next.js App Router, server-side prediction calls, and no client-exposed secrets.",
+    title: "Embedded model fallback",
+    copy: "The app can run the shared Python-model coefficients server-side even when no external prediction API is configured.",
     icon: ShieldCheck,
   },
   {
-    title: "Fast preview experience",
-    copy: "The app includes a demo predictor so local development and preview deploys still work well.",
+    title: "Server-side prediction adapter",
+    copy: "If you later plug in a separate prediction API, the same route can forward requests without exposing secrets to the browser.",
     icon: Sparkles,
   },
 ];
@@ -37,11 +37,12 @@ export default function HomePage() {
             Secure step-by-step diabetes screening
           </div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Diabetes risk prediction with a guided mobile flow and a visual final result.
+            Diabetes risk prediction powered by the supplied Python model and a guided mobile flow.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            DiaVision now walks users through a structured step-by-step intake, then lands them on a clear
-            gauge-style risk screen your team can connect to a real prediction service without rebuilding the UI.
+            DiaVision now walks users through the exact measurements used by the underlying Pima-based logistic model,
+            then lands them on a clear gauge-style result screen with server-side prediction and room for a future
+            external API.
           </p>
         </div>
 

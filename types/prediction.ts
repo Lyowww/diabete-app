@@ -1,22 +1,16 @@
-export type BiologicalSex = "female" | "male" | "another";
-export type ActivityLevel = "low" | "moderate" | "high";
-export type GlucoseHistory = "normal" | "borderline" | "high";
-export type SmokingStatus = "never" | "former" | "current";
 export type RiskLevel = "low" | "moderate" | "high";
 export type ContributorImpact = "watch" | "elevated" | "strong";
-export type ProviderMode = "demo" | "external";
+export type ProviderMode = "embedded" | "external";
 
 export interface RiskAssessmentInput {
+  pregnancies: number;
+  glucose: number;
+  bloodPressure: number;
+  skinThickness: number;
+  insulin: number;
+  diabetesPedigreeFunction: number;
   age: number;
-  biologicalSex: BiologicalSex;
   bmi: number;
-  familyHistory: boolean;
-  hypertension: boolean;
-  activityLevel: ActivityLevel;
-  glucoseHistory: GlucoseHistory;
-  smokingStatus: SmokingStatus;
-  sleepHours: number;
-  gestationalDiabetes: boolean;
 }
 
 export interface PredictionContributor {

@@ -3,58 +3,65 @@ import { describe, expect, it } from "vitest";
 import { riskAssessmentSchema } from "@/lib/validation";
 
 describe("riskAssessmentSchema", () => {
-  it("accepts a valid adult risk profile", () => {
+  it("accepts a valid model-aligned adult profile", () => {
     const result = riskAssessmentSchema.safeParse({
+      pregnancies: 2,
+      glucose: 132,
+      bloodPressure: 78,
+      skinThickness: 29,
+      insulin: 140,
+      diabetesPedigreeFunction: 0.62,
       age: 48,
-      biologicalSex: "female",
       bmi: 29.7,
-      familyHistory: true,
-      hypertension: false,
-      activityLevel: "moderate",
-      glucoseHistory: "borderline",
-      smokingStatus: "former",
-      sleepHours: 7,
-      gestationalDiabetes: true,
     });
 
     expect(result.success).toBe(true);
   });
 
-  it("rejects gestational diabetes answers when pregnancy history does not apply", () => {
+  it("allows zero placeholders for insulin and skin thickness", () => {
     const result = riskAssessmentSchema.safeParse({
+      pregnancies: 0,
+      glucose: 117,
+      bloodPressure: 72,
+      skinThickness: 0,
+      insulin: 0,
+      diabetesPedigreeFunction: 0.31,
       age: 39,
-      biologicalSex: "male",
       bmi: 25.1,
-      familyHistory: false,
-      hypertension: false,
-      activityLevel: "high",
-      glucoseHistory: "normal",
-      smokingStatus: "never",
-      sleepHours: 7.5,
-      gestationalDiabetes: true,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects nonpositive glucose values", () => {
+    const result = riskAssessmentSchema.safeParse({
+      pregnancies: 1,
+      glucose: 0,
+      bloodPressure: 74,
+      skinThickness: 23,
+      insulin: 85,
+      diabetesPedigreeFunction: 0.22,
+      age: 44,
+      bmi: 22.4,
     });
 
     expect(result.success).toBe(false);
 
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.gestationalDiabetes).toContain(
-        "Gestational diabetes should only be marked if pregnancy history applies.",
-      );
+      expect(result.error.flatten().fieldErrors.glucose).toContain("Glucose must be greater than 0.");
     }
   });
 
   it("enforces minimum adult age", () => {
     const result = riskAssessmentSchema.safeParse({
+      pregnancies: 0,
+      glucose: 102,
+      bloodPressure: 70,
+      skinThickness: 18,
+      insulin: 80,
+      diabetesPedigreeFunction: 0.19,
       age: 16,
-      biologicalSex: "female",
       bmi: 22.4,
-      familyHistory: false,
-      hypertension: false,
-      activityLevel: "high",
-      glucoseHistory: "normal",
-      smokingStatus: "never",
-      sleepHours: 8,
-      gestationalDiabetes: false,
     });
 
     expect(result.success).toBe(false);

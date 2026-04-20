@@ -1,3 +1,4 @@
+import modelParameters from "@/lib/pima-model-parameters.json";
 import type {
   ContributorImpact,
   ExternalPredictionResponse,
@@ -7,225 +8,70 @@ import type {
   RiskLevel,
 } from "@/types/prediction";
 
-const DEMO_DISCLAIMER =
-  "This screening tool is educational and does not diagnose diabetes. Use it to guide a follow-up conversation with a licensed clinician.";
+const DISCLAIMER =
+  "This embedded model mirrors the supplied Python logistic regression trained on the Pima Indians Diabetes Dataset with a glucose/BMI copula adjustment. It is an educational screening aid, not a diagnosis, and it may generalize poorly outside the source population or when measurements are estimated.";
 
-type Factor = {
-  label: string;
-  detail: string;
-  points: number;
+const FEATURE_KEYS = [
+  "pregnancies",
+  "glucose",
+  "bloodPressure",
+  "skinThickness",
+  "insulin",
+  "bmi",
+  "diabetesPedigreeFunction",
+  "age",
+] as const;
+
+const MODEL_DRIVER_KEYS = [
+  "glucose",
+  "bmi",
+  "diabetesPedigreeFunction",
+  "age",
+  "pregnancies",
+  "skinThickness",
+] as const;
+
+const IMPUTED_FIELDS = ["glucose", "bloodPressure", "skinThickness", "insulin", "bmi"] as const;
+
+type FeatureKey = (typeof FEATURE_KEYS)[number];
+type ModelDriverKey = (typeof MODEL_DRIVER_KEYS)[number];
+type ImputedField = (typeof IMPUTED_FIELDS)[number];
+
+type ParameterShape = {
+  medians: Record<ImputedField, number>;
+  scalerMean: Record<FeatureKey, number>;
+  scalerScale: Record<FeatureKey, number>;
+  coefficients: Record<FeatureKey, number>;
+  intercept: number;
+  trainAccuracy: number;
+  theta: number;
 };
+
+type ContributorCandidate = {
+  detail: string;
+  importance: number;
+  label: string;
+};
+
+type EmbeddedComputation = {
+  baseProbability: number;
+  finalProbability: number;
+  imputedFields: ImputedField[];
+  input: RiskAssessmentInput;
+  synergyAdjustment: number;
+};
+
+const parameters = modelParameters as ParameterShape;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-function toImpact(points: number): ContributorImpact {
-  if (points >= 4) {
-    return "strong";
-  }
-
-  if (points >= 2) {
-    return "elevated";
-  }
-
-  return "watch";
+function sigmoid(value: number) {
+  return 1 / (1 + Math.exp(-value));
 }
 
-function getAgeFactor(age: number): Factor | null {
-  if (age >= 65) {
-    return {
-      label: "Age 65 or older",
-      detail: "Type 2 diabetes risk rises steadily with age, especially after the mid-60s.",
-      points: 4,
-    };
-  }
-
-  if (age >= 55) {
-    return {
-      label: "Age 55 to 64",
-      detail: "Risk is meaningfully higher in later midlife.",
-      points: 3,
-    };
-  }
-
-  if (age >= 45) {
-    return {
-      label: "Age 45 to 54",
-      detail: "Most screening guidelines become more proactive from age 45 onward.",
-      points: 2,
-    };
-  }
-
-  if (age >= 35) {
-    return {
-      label: "Age 35 to 44",
-      detail: "Risk is still moderate, but screening often begins here when other factors are present.",
-      points: 1,
-    };
-  }
-
-  return null;
-}
-
-function getBmiFactor(bmi: number): Factor | null {
-  if (bmi >= 35) {
-    return {
-      label: "BMI in severe obesity range",
-      detail: "Higher body fat, especially around the abdomen, is strongly associated with insulin resistance.",
-      points: 4,
-    };
-  }
-
-  if (bmi >= 30) {
-    return {
-      label: "BMI in obesity range",
-      detail: "Obesity materially increases type 2 diabetes risk.",
-      points: 3,
-    };
-  }
-
-  if (bmi >= 27) {
-    return {
-      label: "BMI above 27",
-      detail: "Even before obesity, added weight can raise metabolic risk.",
-      points: 2,
-    };
-  }
-
-  if (bmi >= 25) {
-    return {
-      label: "BMI in overweight range",
-      detail: "Being above a BMI of 25 can be one piece of a higher-risk profile.",
-      points: 1,
-    };
-  }
-
-  return null;
-}
-
-function getGlucoseFactor(glucoseHistory: RiskAssessmentInput["glucoseHistory"]): Factor | null {
-  if (glucoseHistory === "high") {
-    return {
-      label: "History of high blood sugar",
-      detail: "A prior diabetes-range result is one of the strongest signs that prompt medical follow-up is important.",
-      points: 6,
-    };
-  }
-
-  if (glucoseHistory === "borderline") {
-    return {
-      label: "History of borderline glucose or A1c",
-      detail: "Prediabetes-range results are a major signal for future diabetes risk.",
-      points: 4,
-    };
-  }
-
-  return null;
-}
-
-function getLifestyleFactor(input: RiskAssessmentInput): Factor[] {
-  const factors: Factor[] = [];
-
-  if (input.activityLevel === "low") {
-    factors.push({
-      label: "Low activity level",
-      detail: "Regular weekly movement improves insulin sensitivity and lowers overall risk.",
-      points: 2,
-    });
-  } else if (input.activityLevel === "moderate") {
-    factors.push({
-      label: "Activity could be higher",
-      detail: "A moderate activity routine is helpful, but many adults benefit from pushing closer to guideline targets.",
-      points: 1,
-    });
-  }
-
-  if (input.smokingStatus === "current") {
-    factors.push({
-      label: "Current smoking",
-      detail: "Smoking is linked with poorer cardiometabolic health and a higher type 2 diabetes burden.",
-      points: 2,
-    });
-  } else if (input.smokingStatus === "former") {
-    factors.push({
-      label: "Past smoking history",
-      detail: "Former smoking is a smaller signal than current smoking, but it can still be part of the overall picture.",
-      points: 1,
-    });
-  }
-
-  if (input.sleepHours < 6 || input.sleepHours > 9) {
-    factors.push({
-      label: "Sleep outside the typical range",
-      detail: "Very short or very long sleep can accompany metabolic stress and reduced recovery.",
-      points: 1,
-    });
-  }
-
-  return factors;
-}
-
-function buildFactors(input: RiskAssessmentInput) {
-  const factors: Factor[] = [];
-  const ageFactor = getAgeFactor(input.age);
-  const bmiFactor = getBmiFactor(input.bmi);
-  const glucoseFactor = getGlucoseFactor(input.glucoseHistory);
-
-  if (ageFactor) {
-    factors.push(ageFactor);
-  }
-
-  if (bmiFactor) {
-    factors.push(bmiFactor);
-  }
-
-  if (input.familyHistory) {
-    factors.push({
-      label: "Family history of diabetes",
-      detail: "A close relative with diabetes increases inherited and household-pattern risk.",
-      points: 3,
-    });
-  }
-
-  if (input.hypertension) {
-    factors.push({
-      label: "High blood pressure",
-      detail: "Hypertension often travels with insulin resistance and cardiovascular risk.",
-      points: 2,
-    });
-  }
-
-  if (input.gestationalDiabetes) {
-    factors.push({
-      label: "History of gestational diabetes",
-      detail: "Prior gestational diabetes is a strong signal for later type 2 diabetes risk.",
-      points: 3,
-    });
-  }
-
-  if (glucoseFactor) {
-    factors.push(glucoseFactor);
-  }
-
-  factors.push(...getLifestyleFactor(input));
-
-  return factors.sort((left, right) => right.points - left.points);
-}
-
-function getRiskLevel(probability: number): RiskLevel {
-  if (probability >= 0.55) {
-    return "high";
-  }
-
-  if (probability >= 0.25) {
-    return "moderate";
-  }
-
-  return "low";
-}
-
-function formatList(labels: string[]) {
+function formatLabel(labels: string[]) {
   if (labels.length === 0) {
     return "";
   }
@@ -241,89 +87,246 @@ function formatList(labels: string[]) {
   return `${labels.slice(0, -1).join(", ")}, and ${labels.at(-1)}`;
 }
 
-function buildSummary(riskLevel: RiskLevel, factors: Factor[]) {
-  const topDrivers = factors.slice(0, 3).map((factor) => factor.label.toLowerCase());
-  const driverText = topDrivers.length
-    ? `The strongest contributors in this estimate were ${formatList(topDrivers)}.`
-    : "No major single risk driver stood out from the information provided.";
+function getRiskLevel(probability: number): RiskLevel {
+  if (probability >= 0.55) {
+    return "high";
+  }
+
+  if (probability >= 0.25) {
+    return "moderate";
+  }
+
+  return "low";
+}
+
+function getImpact(importance: number): ContributorImpact {
+  if (importance >= 0.8) {
+    return "strong";
+  }
+
+  if (importance >= 0.3) {
+    return "elevated";
+  }
+
+  return "watch";
+}
+
+function normalizeInput(input: RiskAssessmentInput) {
+  const imputedFields: ImputedField[] = [];
+
+  const normalized = { ...input };
+
+  for (const field of IMPUTED_FIELDS) {
+    if (normalized[field] <= 0) {
+      normalized[field] = parameters.medians[field];
+      imputedFields.push(field);
+    }
+  }
+
+  return { input: normalized, imputedFields };
+}
+
+function getStandardizedValue(input: RiskAssessmentInput, key: FeatureKey) {
+  return (input[key] - parameters.scalerMean[key]) / parameters.scalerScale[key];
+}
+
+function frankCopulaAdjustment(u: number, v: number) {
+  const theta = parameters.theta;
+
+  if (theta === 0) {
+    return u * v;
+  }
+
+  const numerator = (Math.exp(-theta * u) - 1) * (Math.exp(-theta * v) - 1);
+  const denominator = Math.exp(-theta) - 1;
+  return -(1 / theta) * Math.log(1 + numerator / denominator);
+}
+
+function computeEmbeddedPrediction(input: RiskAssessmentInput): EmbeddedComputation {
+  const normalized = normalizeInput(input);
+  const logit =
+    FEATURE_KEYS.reduce(
+      (total, key) =>
+        total + getStandardizedValue(normalized.input, key) * parameters.coefficients[key],
+      parameters.intercept,
+    );
+  const baseProbability = sigmoid(logit);
+  const synergyAdjustment = frankCopulaAdjustment(
+    clamp(normalized.input.glucose / 250, 0, 0.99),
+    clamp(normalized.input.bmi / 60, 0, 0.99),
+  );
+  const finalProbability = clamp(baseProbability + synergyAdjustment * 0.2, 0.01, 0.99);
+
+  return {
+    input: normalized.input,
+    imputedFields: normalized.imputedFields,
+    baseProbability,
+    finalProbability,
+    synergyAdjustment,
+  };
+}
+
+function buildFeatureDetail(key: ModelDriverKey, value: number) {
+  if (key === "glucose") {
+    return `Glucose of ${value.toFixed(0)} mg/dL sat above the model's average and was a major upward driver.`;
+  }
+
+  if (key === "bmi") {
+    return `BMI of ${value.toFixed(1)} was above the training-set center and increased the estimated odds.`;
+  }
+
+  if (key === "diabetesPedigreeFunction") {
+    return `A diabetes pedigree function of ${value.toFixed(2)} raised the score, reflecting a stronger family-history signal in the source dataset.`;
+  }
+
+  if (key === "age") {
+    return `Age ${value.toFixed(0)} was above the model's average adult age and nudged risk higher.`;
+  }
+
+  if (key === "pregnancies") {
+    return `Pregnancy count of ${value.toFixed(0)} was above the cohort average and added to the model score.`;
+  }
+
+  return `Skin thickness of ${value.toFixed(0)} mm slightly increased the score in this model.`;
+}
+
+function buildContributorCandidates({
+  input,
+  synergyAdjustment,
+}: Pick<EmbeddedComputation, "input" | "synergyAdjustment">) {
+  const candidates: ContributorCandidate[] = [];
+
+  for (const key of MODEL_DRIVER_KEYS) {
+    const contribution = getStandardizedValue(input, key) * parameters.coefficients[key];
+
+    if (contribution <= 0.08) {
+      continue;
+    }
+
+    candidates.push({
+      label:
+        key === "diabetesPedigreeFunction"
+          ? "Diabetes pedigree function"
+          : key === "skinThickness"
+            ? "Skin thickness"
+            : key === "bmi"
+              ? "Body mass index"
+              : key === "glucose"
+                ? "Current glucose level"
+                : key === "pregnancies"
+                  ? "Pregnancy count"
+                  : "Age",
+      detail: buildFeatureDetail(key, input[key]),
+      importance: contribution,
+    });
+  }
+
+  if (synergyAdjustment >= 0.18) {
+    candidates.push({
+      label: "Glucose and BMI interaction",
+      detail:
+        "The copula adjustment boosted the result because glucose and BMI were elevated together, which the original Python model treats as a compounded risk signal.",
+      importance: synergyAdjustment,
+    });
+  }
+
+  candidates.sort((left, right) => right.importance - left.importance);
+  return candidates;
+}
+
+function buildContributors(computation: EmbeddedComputation): PredictionContributor[] {
+  const candidates = buildContributorCandidates(computation);
+
+  if (candidates.length === 0) {
+    return [
+      {
+        label: "Measurements stayed near model averages",
+        detail:
+          "Most inputs landed close to the embedded model's center values, which kept the estimated risk lower.",
+        impact: "watch",
+      },
+    ];
+  }
+
+  return candidates.slice(0, 5).map((candidate) => ({
+    label: candidate.label,
+    detail: candidate.detail,
+    impact: getImpact(candidate.importance),
+  }));
+}
+
+function buildSummary(
+  computation: EmbeddedComputation,
+  riskLevel: RiskLevel,
+  contributors: PredictionContributor[],
+) {
+  const labels = contributors
+    .slice(0, 3)
+    .map((contributor) => contributor.label.toLowerCase());
+  const driverText =
+    labels.length > 0
+      ? `The strongest model drivers were ${formatLabel(labels)}.`
+      : "No single measurement stood out strongly against the model averages.";
+  const imputationText =
+    computation.imputedFields.length > 0
+      ? ` Zero values for ${formatLabel(
+          computation.imputedFields.map((field) =>
+            field === "bloodPressure"
+              ? "blood pressure"
+              : field === "skinThickness"
+                ? "skin thickness"
+                : field === "bmi"
+                  ? "BMI"
+                  : field,
+          ),
+        )} were treated as missing and replaced with the training-set medians, matching the original Python preprocessing.`
+      : "";
 
   if (riskLevel === "high") {
-    return `Your answers point to a higher-risk profile for type 2 diabetes screening. ${driverText} Consider arranging formal lab-based screening soon.`;
+    return `This model estimates a higher current diabetes-screening risk profile. ${driverText}${imputationText} Arrange confirmatory clinical testing soon.`;
   }
 
   if (riskLevel === "moderate") {
-    return `Your answers suggest a moderate diabetes risk profile, with a few factors worth tightening. ${driverText} A clinician-guided screening plan would be reasonable.`;
+    return `This model estimates a moderate diabetes-screening risk profile. ${driverText}${imputationText} A clinician-guided follow-up plan would be reasonable.`;
   }
 
-  return `Your current profile trends lower risk than the average adult, though regular screening can still be appropriate based on age and history. ${driverText}`;
+  return `This model estimates a lower current diabetes-screening risk profile. ${driverText}${imputationText} Keep routine screening in place as your measurements or symptoms change.`;
 }
 
-function buildRecommendedActions(riskLevel: RiskLevel, input: RiskAssessmentInput) {
+function buildRecommendedActions(computation: EmbeddedComputation, riskLevel: RiskLevel) {
+  const { input } = computation;
   const actions = new Set<string>();
 
   if (riskLevel === "high") {
     actions.add("Arrange clinician follow-up soon and ask whether fasting glucose or HbA1c testing is appropriate.");
-    actions.add("Review weight, blood pressure, and medication factors with a clinician or registered dietitian.");
+    actions.add("Review your weight, blood pressure, and medication picture with a clinician or dietitian.");
   } else if (riskLevel === "moderate") {
-    actions.add("Discuss a preventive screening plan with your clinician, especially if you are over 35 or have other risk factors.");
-    actions.add("Aim for at least 150 minutes of weekly activity plus two sessions of strength work.");
+    actions.add("Discuss a repeat diabetes screening plan with your clinician in the near term.");
+    actions.add("Tighten weekly activity, nutrition, and sleep habits while you confirm the result.");
   } else {
-    actions.add("Keep up regular screening intervals recommended for your age and health history.");
-    actions.add("Protect your current risk profile with consistent activity, sleep, and nutrition habits.");
+    actions.add("Keep routine preventive screening in place, especially if your measurements trend upward.");
+    actions.add("Protect your current profile with regular activity, weight management, and blood pressure checks.");
   }
 
-  if (input.glucoseHistory !== "normal") {
-    actions.add("Because you reported prior abnormal glucose results, confirm the current picture with formal lab testing.");
+  if (input.glucose >= 126) {
+    actions.add("Because glucose was elevated, confirm the result with formal lab testing rather than relying on a screening estimate alone.");
+  } else if (input.glucose >= 100) {
+    actions.add("A borderline glucose value is worth rechecking with fasting glucose or HbA1c if you have not done that recently.");
   }
 
-  if (input.hypertension) {
-    actions.add("Keep blood pressure controlled, since cardiometabolic risks often compound each other.");
+  if (input.bmi >= 30) {
+    actions.add("A modest reduction in weight or waist size can materially improve insulin sensitivity over time.");
   }
 
-  if (input.activityLevel !== "high") {
-    actions.add("Increase steady weekly movement, especially brisk walking or similar moderate-intensity activity.");
+  if (input.bloodPressure >= 90) {
+    actions.add("Monitor blood pressure closely because cardiometabolic risks often compound one another.");
+  }
+
+  if (computation.imputedFields.length > 0) {
+    actions.add("Replace any zero placeholders with measured values next time to improve estimate quality.");
   }
 
   return Array.from(actions).slice(0, 4);
-}
-
-function buildContributors(factors: Factor[]): PredictionContributor[] {
-  return factors.slice(0, 5).map((factor) => ({
-    label: factor.label,
-    detail: factor.detail,
-    impact: toImpact(factor.points),
-  }));
-}
-
-function normalizeNumber(value: number, fallback: number) {
-  if (!Number.isFinite(value)) {
-    return fallback;
-  }
-
-  return value;
-}
-
-export function buildMockPrediction(input: RiskAssessmentInput): PredictionResult {
-  const factors = buildFactors(input);
-  const score = factors.reduce((total, factor) => total + factor.points, 0);
-  const maxScore = 27;
-  const probability = clamp(1 / (1 + Math.exp(-((score - 10) / 3.5))), 0.03, 0.97);
-  const riskLevel = getRiskLevel(probability);
-
-  return {
-    probability,
-    riskLevel,
-    score,
-    maxScore,
-    confidence: 0.72,
-    summary: buildSummary(riskLevel, factors),
-    contributors: buildContributors(factors),
-    recommendedActions: buildRecommendedActions(riskLevel, input),
-    provider: "Built-in demo predictor",
-    providerMode: "demo",
-    disclaimer: DEMO_DISCLAIMER,
-    evaluatedAt: new Date().toISOString(),
-  };
 }
 
 function normalizeContributor(candidate: Partial<PredictionContributor> | undefined) {
@@ -340,6 +343,41 @@ function normalizeContributor(candidate: Partial<PredictionContributor> | undefi
   } satisfies PredictionContributor;
 }
 
+export function buildEmbeddedPrediction(input: RiskAssessmentInput): PredictionResult {
+  const computation = computeEmbeddedPrediction(input);
+  const probability = computation.finalProbability;
+  const riskLevel = getRiskLevel(probability);
+  const contributors = buildContributors(computation);
+  const confidence = clamp(
+    parameters.trainAccuracy - (computation.imputedFields.length > 0 ? 0.05 : 0),
+    0.55,
+    0.82,
+  );
+
+  return {
+    probability,
+    riskLevel,
+    score: Math.round(probability * 100),
+    maxScore: 100,
+    confidence,
+    summary: buildSummary(computation, riskLevel, contributors),
+    contributors,
+    recommendedActions: buildRecommendedActions(computation, riskLevel),
+    provider: "Embedded Pima logistic model",
+    providerMode: "embedded",
+    disclaimer: DISCLAIMER,
+    evaluatedAt: new Date().toISOString(),
+  };
+}
+
+function normalizeNumber(value: number, fallback: number) {
+  if (!Number.isFinite(value)) {
+    return fallback;
+  }
+
+  return value;
+}
+
 export function normalizeExternalPrediction(
   payload: unknown,
   input: RiskAssessmentInput,
@@ -348,15 +386,15 @@ export function normalizeExternalPrediction(
     throw new Error("Prediction payload must be an object.");
   }
 
+  const embedded = buildEmbeddedPrediction(input);
   const response = payload as ExternalPredictionResponse;
-  const factors = buildFactors(input);
   const responseScore = Number(response.score);
   const responseMaxScore = Number(response.maxScore);
   const rawProbability = Number(response.probability);
   const probabilityFromScore =
     Number.isFinite(responseScore) && Number.isFinite(responseMaxScore) && responseMaxScore > 0
       ? responseScore / responseMaxScore
-      : NaN;
+      : Number.NaN;
   const probability = clamp(
     normalizeNumber(
       Number.isFinite(rawProbability) ? rawProbability : probabilityFromScore,
@@ -394,19 +432,19 @@ export function normalizeExternalPrediction(
       ? response.recommendedActions
       : response.recommended_actions && response.recommended_actions.length > 0
         ? response.recommended_actions
-        : buildRecommendedActions(riskLevel, input);
+        : embedded.recommendedActions;
 
   return {
     probability,
     riskLevel,
     score: normalizedScore,
     maxScore: normalizedMaxScore,
-    confidence: Number.isFinite(confidence) && confidence > 0 ? confidence : 0.82,
+    confidence: Number.isFinite(confidence) && confidence > 0 ? confidence : embedded.confidence,
     summary:
       typeof response.summary === "string" && response.summary.trim().length > 0
         ? response.summary
-        : buildSummary(riskLevel, factors),
-    contributors: contributors.length > 0 ? contributors : buildContributors(factors),
+        : embedded.summary,
+    contributors: contributors.length > 0 ? contributors : embedded.contributors,
     recommendedActions,
     provider:
       typeof response.provider === "string" && response.provider.trim().length > 0
@@ -416,7 +454,7 @@ export function normalizeExternalPrediction(
     disclaimer:
       typeof response.disclaimer === "string" && response.disclaimer.trim().length > 0
         ? response.disclaimer
-        : DEMO_DISCLAIMER,
+        : embedded.disclaimer,
     evaluatedAt: new Date().toISOString(),
   };
 }

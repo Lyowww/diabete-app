@@ -1,0 +1,42 @@
+{
+  "medians": {
+    "glucose": 117,
+    "bloodPressure": 72,
+    "skinThickness": 29,
+    "insulin": 125,
+    "bmi": 32.3
+  },
+  "scalerMean": {
+    "pregnancies": 3.8450520833333335,
+    "glucose": 121.65625,
+    "bloodPressure": 72.38671875,
+    "skinThickness": 29.108072916666668,
+    "insulin": 140.671875,
+    "bmi": 32.45520833333333,
+    "diabetesPedigreeFunction": 0.47187630208333325,
+    "age": 33.240885416666664
+  },
+  "scalerScale": {
+    "pregnancies": 3.3673836124089958,
+    "glucose": 30.418462775166116,
+    "bloodPressure": 12.088763750899638,
+    "skinThickness": 8.785495707586254,
+    "insulin": 86.32680240314153,
+    "bmi": 6.870699333517456,
+    "diabetesPedigreeFunction": 0.3311128160286291,
+    "age": 11.752572645994181
+  },
+  "coefficients": {
+    "pregnancies": 0.4138953234695523,
+    "glucose": 1.1340300416948983,
+    "bloodPressure": -0.10679824805885588,
+    "skinThickness": 0.035357655879986516,
+    "insulin": -0.09370641021818907,
+    "bmi": 0.6354336678404932,
+    "diabetesPedigreeFunction": 0.2867520104854388,
+    "age": 0.15344865206859332
+  },
+  "intercept": -0.8577043567624193,
+  "trainAccuracy": 0.7734375,
+  "theta": 4.5
+}
