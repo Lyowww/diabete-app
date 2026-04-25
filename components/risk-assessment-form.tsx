@@ -51,7 +51,7 @@ const wizardSteps: readonly WizardStep[] = [
     eyebrow: "Step 1",
     title: "Welcome to Your Health Assessment",
     description:
-      "This quick questionnaire will help you understand your metabolic health. It takes just a few minutes to complete.",
+      "This quick questionnaire will help you understand your diabetes risk. It takes just a few minutes to complete.",
   },
   {
     id: "profile",
@@ -99,7 +99,7 @@ const wizardSteps: readonly WizardStep[] = [
     eyebrow: "Step 6",
     title: "Your Health Overview",
     description:
-      "Here is a summary of your metabolic health assessment based on the information you provided.",
+      "Here is a summary of your diabetes risk assessment based on the information you provided.",
   },
 ];
 
@@ -388,7 +388,7 @@ export function RiskAssessmentForm() {
                 {
                   icon: FlaskConical,
                   title: "Smart Analysis",
-                  copy: "We'll securely analyze your numbers to give you a personalized overview of your wellness.",
+                  copy: "We'll securely analyze your numbers to give you a personalized overview of your risk profile.",
                 },
                 {
                   icon: Activity,
@@ -416,7 +416,7 @@ export function RiskAssessmentForm() {
                   "Have your most recent lab results handy for the best accuracy (like your blood sugar and blood pressure).",
                   "If you have never been pregnant or it doesn't apply to you, simply enter 0 for the pregnancy count.",
                   "Don't worry if you don't know your exact insulin or skin thickness levels. Just enter 0, and we'll use a standard average.",
-                  "We'll ask about your family history to better understand your genetic background.",
+                  "We'll ask about your family history to better understand your genetic background related to diabetes.",
                 ].map((item) => (
                   <div
                     key={item}
@@ -477,7 +477,7 @@ export function RiskAssessmentForm() {
               </div>
               <h3 className="mt-4 text-lg font-semibold text-white">Why we ask for this</h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Age, weight, and health history are some of the most important factors when it comes to understanding your long-term wellness.
+                Age, weight, and health history are some of the most important baseline factors when assessing diabetes risk.
               </p>
             </div>
           </div>
@@ -621,7 +621,7 @@ export function RiskAssessmentForm() {
                   {[
                     "We'll do a quick check to make sure your answers are ready to go.",
                     "Our system will securely review your health factors together.",
-                    "You'll get a clear, easy-to-read summary of your metabolic wellness on the next screen.",
+                    "You'll get a clear, easy-to-read summary of your potential diabetes risk on the next screen.",
                   ].map((item) => (
                     <div
                       key={item}

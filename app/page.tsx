@@ -11,7 +11,7 @@ const highlights = [
   },
   {
     title: "Personalized Insights",
-    copy: "Get a clear, visual summary of your metabolic health and helpful recommendations based on your unique profile.",
+    copy: "Get a clear, visual summary of your potential diabetes risk factors and helpful recommendations based on your unique profile.",
     icon: Stethoscope,
   },
   {
@@ -37,10 +37,10 @@ export default function HomePage() {
             Secure & private health screening
           </div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Understand Your Metabolic Health
+            Understand Your Diabetes Risk
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            This tool helps you understand your potential risk for metabolic syndrome and related complications. By answering a few simple questions about your health, you'll receive personalized insights to help you make informed lifestyle choices.
+            This tool helps you understand your potential risk for developing diabetes. By answering a few simple questions about your health, you'll receive personalized insights to help you make informed lifestyle choices.
           </p>
         </div>
 
