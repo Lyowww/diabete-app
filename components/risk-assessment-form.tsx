@@ -49,18 +49,18 @@ const wizardSteps: readonly WizardStep[] = [
     label: "Welcome",
     shortLabel: "Start",
     eyebrow: "Step 1",
-    title: "A wizard aligned to the real model",
+    title: "Metabolic Risk Assessment System",
     description:
-      "This flow now collects the exact eight measurements used by the supplied Python logistic-regression model and its glucose/BMI copula adjustment.",
+      "This application evaluates the joint risk of metabolic complications using Logistic Regression and Copula theory to support clinical decision-making.",
   },
   {
     id: "profile",
     label: "Core profile",
     shortLabel: "Profile",
     eyebrow: "Step 2",
-    title: "Start with age, BMI, and pregnancy history",
+    title: "Patient Biometrics & History",
     description:
-      "These are major model inputs. Pregnancy count can be 0 if it does not apply or if you have never been pregnant.",
+      "Begin by inputting primary demographic and biometric parameters. These form the baseline of the regression model.",
     fields: ["age", "pregnancies", "bmi"],
   },
   {
@@ -68,9 +68,9 @@ const wizardSteps: readonly WizardStep[] = [
     label: "Lab values",
     shortLabel: "Labs",
     eyebrow: "Step 3",
-    title: "Add the glucose and blood-pressure measurements",
+    title: "Clinical Laboratory Results",
     description:
-      "The original model leans heavily on recent glucose and also uses blood pressure as one of the clinical inputs.",
+      "Input the patient's recent glucose and blood pressure metrics, which serve as critical independent variables for the algorithm.",
     fields: ["glucose", "bloodPressure"],
   },
   {
@@ -78,9 +78,9 @@ const wizardSteps: readonly WizardStep[] = [
     label: "Additional inputs",
     shortLabel: "More",
     eyebrow: "Step 4",
-    title: "Complete the remaining model measurements",
+    title: "Advanced Clinical Metrics",
     description:
-      "Skin thickness, insulin, and diabetes pedigree function complete the input set. For skin thickness or insulin, a value of 0 is allowed and will be imputed to the training-set median, matching the Python preprocessing.",
+      "Complete the dataset with skin fold thickness, insulin levels, and genetic predisposition (pedigree function) to maximize model accuracy.",
     fields: ["skinThickness", "insulin", "diabetesPedigreeFunction"],
   },
   {
@@ -88,18 +88,18 @@ const wizardSteps: readonly WizardStep[] = [
     label: "Review",
     shortLabel: "Review",
     eyebrow: "Step 5",
-    title: "Review the model inputs before prediction",
+    title: "Verify Clinical Data",
     description:
-      "The server will validate these values, run the embedded version of the supplied Python model, and then render the final result page.",
+      "Ensure all entered variables are accurate. The system will securely process these inputs through the joint distribution model.",
   },
   {
     id: "result",
     label: "Result",
     shortLabel: "Result",
     eyebrow: "Step 6",
-    title: "Your model output",
+    title: "Risk Assessment Output",
     description:
-      "The final page shows the predicted probability, risk tier, and the strongest drivers produced from the Python model logic.",
+      "View the calculated marginal probabilities and the Copula-based joint risk of developing metabolic complications.",
   },
 ];
 
@@ -382,18 +382,18 @@ export function RiskAssessmentForm() {
               {[
                 {
                   icon: ClipboardList,
-                  title: "Exact model inputs",
-                  copy: "The wizard now matches the eight features in the supplied Python file instead of using proxy lifestyle questions.",
+                  title: "Machine Learning Driven",
+                  copy: "Utilizes precise clinical parameters rather than generic lifestyle proxies to fuel a customized Logistic Regression model.",
                 },
                 {
                   icon: FlaskConical,
-                  title: "Real preprocessing rules",
-                  copy: "Zero values for skin thickness or insulin are allowed and are handled exactly like the original training pipeline.",
+                  title: "Robust Data Processing",
+                  copy: "Intelligently handles missing values (e.g., zero for insulin) by imputing median statistics from the clinical training set.",
                 },
                 {
                   icon: Activity,
-                  title: "Same glucose/BMI interaction",
-                  copy: "The final probability still includes the copula-based synergy term from the Python model.",
+                  title: "Copula-Based Joint Risk",
+                  copy: "Evaluates the mathematical dependency between complications (e.g., synergy between BMI and glucose) to prevent risk underestimation.",
                 },
               ].map(({ copy, icon: Icon, title }) => (
                 <div
@@ -413,10 +413,10 @@ export function RiskAssessmentForm() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">Before you begin</p>
               <div className="mt-4 grid gap-3">
                 {[
-                  "Use recent measured values when you have them, especially for glucose, BMI, and blood pressure.",
-                  "Pregnancy count can be 0 if it is not relevant or you have never been pregnant.",
-                  "Skin thickness and insulin can be entered as 0 when unknown; the model will replace them with the training-set medians.",
-                  "Diabetes pedigree function is part of the source dataset, so this wizard exposes it directly instead of estimating it.",
+                  "Utilize the most recent laboratory and biometric measurements available for optimal accuracy.",
+                  "For the pregnancy count metric, enter 0 if it is not applicable.",
+                  "Unknown clinical values (such as insulin) can be entered as 0; the model will apply statistical median imputation.",
+                  "The diabetes pedigree function evaluates genetic predisposition based on clinical history.",
                 ].map((item) => (
                   <div
                     key={item}
@@ -428,8 +428,7 @@ export function RiskAssessmentForm() {
               </div>
 
               <div className="mt-5 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm leading-6 text-cyan-50">
-                The result remains educational only. This model was trained on the Pima Indians Diabetes Dataset and
-                should be used as a screening reference rather than a diagnosis.
+                This tool is designed as a Clinical Decision Support System (CDSS) for research purposes. It should be used as an educational screening reference, not a formal diagnosis.
               </div>
             </div>
           </div>
@@ -446,7 +445,7 @@ export function RiskAssessmentForm() {
         >
           <div className="grid gap-5 md:grid-cols-2">
             <MetricField
-              description="The source dataset contains adult participants only."
+              description="The source dataset is calibrated for adult clinical data."
               error={errors.age?.message}
               id="age"
               inputMode="numeric"
@@ -455,7 +454,7 @@ export function RiskAssessmentForm() {
               register={register}
             />
             <MetricField
-              description="Enter 0 if not applicable or if you have never been pregnant."
+              description="Enter 0 if not applicable."
               error={errors.pregnancies?.message}
               id="pregnancies"
               inputMode="numeric"
@@ -464,7 +463,7 @@ export function RiskAssessmentForm() {
               register={register}
             />
             <MetricField
-              description="Body-mass index is one of the strongest drivers in the embedded model."
+              description="Body Mass Index (BMI) is a primary risk coefficient in the embedded algorithm."
               error={errors.bmi?.message}
               id="bmi"
               label="BMI"
@@ -476,10 +475,9 @@ export function RiskAssessmentForm() {
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-200">
                 <Ruler className="h-5 w-5" />
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-white">Why these matter</h3>
+              <h3 className="mt-4 text-lg font-semibold text-white">Clinical Relevance</h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Age, BMI, and pregnancy count are all part of the logistic regression coefficients used in the source
-                Python model.
+                Age, BMI, and baseline history are heavily weighted coefficients in the underlying logistic regression matrices.
               </p>
             </div>
           </div>
@@ -496,7 +494,7 @@ export function RiskAssessmentForm() {
         >
           <div className="grid gap-5 md:grid-cols-2">
             <MetricField
-              description="Use a recent fasting or clinical reading if available."
+              description="Input a recent fasting or clinical reading."
               error={errors.glucose?.message}
               id="glucose"
               label="Glucose (mg/dL)"
@@ -504,7 +502,7 @@ export function RiskAssessmentForm() {
               register={register}
             />
             <MetricField
-              description="Use systolic blood pressure in mmHg."
+              description="Input systolic blood pressure in mmHg."
               error={errors.bloodPressure?.message}
               id="bloodPressure"
               label="Blood pressure (mmHg)"
@@ -526,7 +524,7 @@ export function RiskAssessmentForm() {
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="grid gap-5 md:grid-cols-2">
               <MetricField
-                description="Enter 0 if unknown; the predictor will use the training-set median of 29."
+                description="Enter 0 if unknown; the algorithm will apply median imputation."
                 error={errors.skinThickness?.message}
                 id="skinThickness"
                 label="Skin thickness (mm)"
@@ -534,7 +532,7 @@ export function RiskAssessmentForm() {
                 register={register}
               />
               <MetricField
-                description="Enter 0 if unknown; the predictor will use the training-set median of 125."
+                description="Enter 0 if unknown; the algorithm will apply median imputation."
                 error={errors.insulin?.message}
                 id="insulin"
                 label="Insulin"
@@ -543,7 +541,7 @@ export function RiskAssessmentForm() {
               />
               <div className="md:col-span-2">
                 <MetricField
-                  description="This family-history score is part of the source dataset. Typical values often fall between 0.1 and 1.5."
+                  description="A genetic predisposition metric. Typical clinical values fall between 0.1 and 1.5."
                   error={errors.diabetesPedigreeFunction?.message}
                   id="diabetesPedigreeFunction"
                   label="Diabetes pedigree function"
@@ -558,13 +556,13 @@ export function RiskAssessmentForm() {
               {[
                 {
                   icon: FlaskConical,
-                  title: "Median imputation supported",
-                  copy: "The original Python training script replaced zeros in several fields with dataset medians. This flow keeps that behavior where it is clinically plausible.",
+                  title: "Automated Imputation",
+                  copy: "Missing physiological values are gracefully handled using median substitution to ensure uninterrupted algorithm execution.",
                 },
                 {
                   icon: Sparkles,
-                  title: "Model-faithful output",
-                  copy: "The backend now uses the learned logistic coefficients plus the same glucose/BMI synergy term instead of a generic demo score.",
+                  title: "Synergistic Output",
+                  copy: "The backend calculates independent probabilities and evaluates their joint Copula distributions for superior predictive accuracy.",
                 },
               ].map(({ copy, icon: Icon, title }) => (
                 <div
@@ -621,9 +619,9 @@ export function RiskAssessmentForm() {
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">What happens next</p>
                 <div className="mt-4 grid gap-3">
                   {[
-                    "The validated inputs are posted to the server-side prediction route.",
-                    "If no external API is configured, the app uses the embedded port of your Python model and shared coefficients.",
-                    "The result page shows probability, key contributors, and the same glucose/BMI interaction logic from the original script.",
+                    "The system will validate your clinical inputs against the expected algorithmic parameters.",
+                    "The data is processed through the logistic regression model to calculate independent marginal probabilities.",
+                    "Copula functions are applied to determine the joint risk, generating the final personalized clinical insights.",
                   ].map((item) => (
                     <div
                       key={item}
@@ -636,8 +634,7 @@ export function RiskAssessmentForm() {
               </div>
 
               <div className="rounded-[30px] border border-cyan-300/20 bg-cyan-300/10 px-4 py-4 text-sm leading-6 text-cyan-50 shadow-[0_16px_40px_rgba(2,6,23,0.24)]">
-                This model remains a screening aid only. Elevated results should be confirmed with formal lab testing
-                and clinician review.
+                Important: This algorithm serves as an educational screening aid. Elevated risk scores must be confirmed via formal laboratory testing and clinical consultation.
               </div>
             </div>
           </div>
@@ -714,9 +711,9 @@ export function RiskAssessmentForm() {
 
           <div className="glass-card rounded-[32px] p-4 shadow-[0_24px_70px_rgba(15,23,42,0.16)] sm:flex sm:items-center sm:justify-between sm:p-5">
             <div>
-              <p className="text-lg font-semibold text-white">Need to change something?</p>
+              <p className="text-lg font-semibold text-white">Need to adjust clinical metrics?</p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
-                Jump back to the review step to adjust the model inputs, or reset the wizard and start again.
+                Jump back to the review step to modify the patient data, or reset the wizard for a new assessment.
               </p>
             </div>
             <div className="mt-4 flex flex-col gap-3 sm:mt-0 sm:flex-row">
@@ -756,8 +753,8 @@ export function RiskAssessmentForm() {
               <p className="text-lg font-semibold text-white">{currentStepConfig.title}</p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
                 {isReviewStep
-                  ? "Ready to run the embedded model and render the final result page."
-                  : "Move through the measurements in order so the final prediction uses the real model inputs."}
+                  ? "Ready to process the data through the Machine Learning and Copula models."
+                  : "Proceed sequentially to ensure the mathematical model receives the correct input vector."}
               </p>
             </div>
 
@@ -772,7 +769,7 @@ export function RiskAssessmentForm() {
               {isReviewStep ? (
                 <button className={primaryButtonClassName} disabled={isSubmitting} type="submit">
                   {isSubmitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {isSubmitting ? "Running model" : "Show my result"}
+                  {isSubmitting ? "Processing data" : "Calculate Joint Risk"}
                 </button>
               ) : (
                 <button
