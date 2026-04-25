@@ -12,7 +12,9 @@ const highlights = [
   {
     title: "Gauge-style final result",
     copy: "The last screen is a bold visual result page with a risk gauge, summary, and next-step recommendations.",
-    icon: Stethoscope,
+    icon: Stethoscope,git add .
+git commit -m "new change"
+git push
   },
   {
     title: "Embedded model fallback",
