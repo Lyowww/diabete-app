@@ -1,3 +1,81 @@
+import { Activity, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
+
+import { DisclaimerCard } from "@/components/disclaimer-card";
+import { RiskAssessmentForm } from "@/components/risk-assessment-form";
+
+const highlights = [
+  {
+    title: "Simple Step-by-Step Flow",
+    copy: "Our easy-to-use questionnaire guides you through entering your basic health details and recent lab results.",
+    icon: Activity,
+  },
+  {
+    title: "Personalized Insights",
+    copy: "Get a clear, visual summary of your metabolic health and helpful recommendations based on your unique profile.",
+    icon: Stethoscope,
+  },
+  {
+    title: "Secure & Private",
+    copy: "Your health data is processed securely and is never shared. Your privacy is our top priority.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Comprehensive View",
+    copy: "The assessment looks at how your different health factors work together to give you a complete picture of your wellness.",
+    icon: Sparkles,
+  },
+];
+
+export default function HomePage() {
+  return (
+    <main className="relative overflow-hidden">
+      <div className="subtle-grid pointer-events-none absolute inset-0 opacity-60" />
+
+      <section className="relative mx-auto max-w-7xl px-6 pb-12 pt-10 sm:px-8 lg:px-10 lg:pb-16 lg:pt-16">
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-1.5 text-sm text-cyan-100">
+            Secure & private health screening
+          </div>
+          <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Understand Your Metabolic Health
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+            This tool helps you understand your potential risk for metabolic syndrome and related complications. By answering a few simple questions about your health, you'll receive personalized insights to help you make informed lifestyle choices.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-4">
+          {highlights.map(({ copy, icon: Icon, title }) => (
+            <div key={title} className="glass-card rounded-[28px] p-5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-200">
+                <Icon className="h-5 w-5" />
+              </div>
+              <h2 className="mt-4 text-lg font-semibold text-white">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{copy}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="relative mx-auto max-w-7xl px-6 pb-16 sm:px-8 lg:px-10 lg:pb-24">
+        <div className="mb-6">
+          <DisclaimerCard body="Important Notice: This tool is designed to help you understand your health and is for educational purposes only. It does not provide a formal medical diagnosis and should never replace professional advice, testing, or treatment from your doctor." />
+        </div>
+
+        <RiskAssessmentForm />
+      </section>
+    </main>
+  );
+}
+```
+
+---
+
+### 2. `RiskAssessmentForm.tsx`
+
+You can replace your form code with this:
+
+```tsx
 "use client";
 
 import { useState, type ReactNode } from "react";
@@ -49,38 +127,38 @@ const wizardSteps: readonly WizardStep[] = [
     label: "Welcome",
     shortLabel: "Start",
     eyebrow: "Step 1",
-    title: "Metabolic Risk Assessment System",
+    title: "Welcome to Your Health Assessment",
     description:
-      "This application evaluates the joint risk of metabolic complications using Logistic Regression and Copula theory to support clinical decision-making.",
+      "This quick questionnaire will help you understand your metabolic health. It takes just a few minutes to complete.",
   },
   {
     id: "profile",
-    label: "Core profile",
+    label: "About You",
     shortLabel: "Profile",
     eyebrow: "Step 2",
-    title: "Patient Biometrics & History",
+    title: "Let's start with the basics",
     description:
-      "Begin by inputting primary demographic and biometric parameters. These form the baseline of the regression model.",
+      "Tell us a bit about yourself. Your age and body metrics give us a helpful starting point.",
     fields: ["age", "pregnancies", "bmi"],
   },
   {
     id: "labs",
-    label: "Lab values",
+    label: "Health Numbers",
     shortLabel: "Labs",
     eyebrow: "Step 3",
-    title: "Clinical Laboratory Results",
+    title: "Your recent lab results",
     description:
-      "Input the patient's recent glucose and blood pressure metrics, which serve as critical independent variables for the algorithm.",
+      "Enter your latest blood sugar and blood pressure readings. These are great indicators of your current wellness.",
     fields: ["glucose", "bloodPressure"],
   },
   {
     id: "measurements",
-    label: "Additional inputs",
+    label: "More Details",
     shortLabel: "More",
     eyebrow: "Step 4",
-    title: "Advanced Clinical Metrics",
+    title: "Additional health details",
     description:
-      "Complete the dataset with skin fold thickness, insulin levels, and genetic predisposition (pedigree function) to maximize model accuracy.",
+      "A few more details help make your results as accurate as possible. Don't worry if you don't know every single one.",
     fields: ["skinThickness", "insulin", "diabetesPedigreeFunction"],
   },
   {
@@ -88,18 +166,18 @@ const wizardSteps: readonly WizardStep[] = [
     label: "Review",
     shortLabel: "Review",
     eyebrow: "Step 5",
-    title: "Verify Clinical Data",
+    title: "Review your answers",
     description:
-      "Ensure all entered variables are accurate. The system will securely process these inputs through the joint distribution model.",
+      "Take a moment to check the details you've entered before we generate your personalized health insights.",
   },
   {
     id: "result",
-    label: "Result",
+    label: "Your Results",
     shortLabel: "Result",
     eyebrow: "Step 6",
-    title: "Risk Assessment Output",
+    title: "Your Health Overview",
     description:
-      "View the calculated marginal probabilities and the Copula-based joint risk of developing metabolic complications.",
+      "Here is a summary of your metabolic health assessment based on the information you provided.",
   },
 ];
 
@@ -247,7 +325,7 @@ export function RiskAssessmentForm() {
 
   const reviewSections = [
     {
-      title: "Core profile",
+      title: "About You",
       items: [
         { label: "Age", value: `${values.age} years` },
         { label: "Pregnancies", value: formatReviewValue("pregnancies", values.pregnancies) },
@@ -255,7 +333,7 @@ export function RiskAssessmentForm() {
       ],
     },
     {
-      title: "Lab values",
+      title: "Health Numbers",
       items: [
         { label: "Glucose", value: `${formatReviewValue("glucose", values.glucose)} mg/dL` },
         {
@@ -265,7 +343,7 @@ export function RiskAssessmentForm() {
       ],
     },
     {
-      title: "Additional inputs",
+      title: "More Details",
       items: [
         {
           label: "Skin thickness",
@@ -273,7 +351,7 @@ export function RiskAssessmentForm() {
         },
         { label: "Insulin", value: formatReviewValue("insulin", values.insulin) },
         {
-          label: "Diabetes pedigree function",
+          label: "Family History Score",
           value: formatReviewValue("diabetesPedigreeFunction", values.diabetesPedigreeFunction),
         },
       ],
@@ -358,14 +436,14 @@ export function RiskAssessmentForm() {
           scrollWizardIntoView();
         }
 
-        setServerError(payload.error ?? "The assessment could not be completed. Please try again.");
+        setServerError(payload.error ?? "We couldn't complete the assessment right now. Please try again.");
         return;
       }
 
       setResult(payload.result);
     } catch {
       setCurrentStep(resultStepIndex);
-      setServerError("The network request failed before a result was returned. Please try again.");
+      setServerError("There was a connection issue. Please check your internet and try again.");
     }
   });
 
@@ -382,18 +460,18 @@ export function RiskAssessmentForm() {
               {[
                 {
                   icon: ClipboardList,
-                  title: "Machine Learning Driven",
-                  copy: "Utilizes precise clinical parameters rather than generic lifestyle proxies to fuel a customized Logistic Regression model.",
+                  title: "Quick & Easy",
+                  copy: "Answer a few straightforward questions about your health history and recent lab tests.",
                 },
                 {
                   icon: FlaskConical,
-                  title: "Robust Data Processing",
-                  copy: "Intelligently handles missing values (e.g., zero for insulin) by imputing median statistics from the clinical training set.",
+                  title: "Smart Analysis",
+                  copy: "We'll securely analyze your numbers to give you a personalized overview of your wellness.",
                 },
                 {
                   icon: Activity,
-                  title: "Copula-Based Joint Risk",
-                  copy: "Evaluates the mathematical dependency between complications (e.g., synergy between BMI and glucose) to prevent risk underestimation.",
+                  title: "Holistic View",
+                  copy: "See how different factors like weight, age, and blood sugar work together to impact your health.",
                 },
               ].map(({ copy, icon: Icon, title }) => (
                 <div
@@ -410,13 +488,13 @@ export function RiskAssessmentForm() {
             </div>
 
             <div className="rounded-[30px] border border-white/10 bg-slate-950/45 p-5 shadow-[0_16px_40px_rgba(2,6,23,0.24)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">Before you begin</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">Tips for success</p>
               <div className="mt-4 grid gap-3">
                 {[
-                  "Utilize the most recent laboratory and biometric measurements available for optimal accuracy.",
-                  "For the pregnancy count metric, enter 0 if it is not applicable.",
-                  "Unknown clinical values (such as insulin) can be entered as 0; the model will apply statistical median imputation.",
-                  "The diabetes pedigree function evaluates genetic predisposition based on clinical history.",
+                  "Have your most recent lab results handy for the best accuracy (like your blood sugar and blood pressure).",
+                  "If you have never been pregnant or it doesn't apply to you, simply enter 0 for the pregnancy count.",
+                  "Don't worry if you don't know your exact insulin or skin thickness levels. Just enter 0, and we'll use a standard average.",
+                  "We'll ask about your family history to better understand your genetic background.",
                 ].map((item) => (
                   <div
                     key={item}
@@ -428,7 +506,7 @@ export function RiskAssessmentForm() {
               </div>
 
               <div className="mt-5 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm leading-6 text-cyan-50">
-                This tool is designed as a Clinical Decision Support System (CDSS) for research purposes. It should be used as an educational screening reference, not a formal diagnosis.
+                Remember, this tool is here to educate and inform. It is not a replacement for a doctor's visit or a formal medical diagnosis.
               </div>
             </div>
           </div>
@@ -445,7 +523,7 @@ export function RiskAssessmentForm() {
         >
           <div className="grid gap-5 md:grid-cols-2">
             <MetricField
-              description="The source dataset is calibrated for adult clinical data."
+              description="Please enter your current age in years."
               error={errors.age?.message}
               id="age"
               inputMode="numeric"
@@ -454,7 +532,7 @@ export function RiskAssessmentForm() {
               register={register}
             />
             <MetricField
-              description="Enter 0 if not applicable."
+              description="Enter 0 if this doesn't apply to you or if you've never been pregnant."
               error={errors.pregnancies?.message}
               id="pregnancies"
               inputMode="numeric"
@@ -463,7 +541,7 @@ export function RiskAssessmentForm() {
               register={register}
             />
             <MetricField
-              description="Body Mass Index (BMI) is a primary risk coefficient in the embedded algorithm."
+              description="Your Body Mass Index (BMI) helps us understand your overall physical profile."
               error={errors.bmi?.message}
               id="bmi"
               label="BMI"
@@ -475,9 +553,9 @@ export function RiskAssessmentForm() {
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-200">
                 <Ruler className="h-5 w-5" />
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-white">Clinical Relevance</h3>
+              <h3 className="mt-4 text-lg font-semibold text-white">Why we ask for this</h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Age, BMI, and baseline history are heavily weighted coefficients in the underlying logistic regression matrices.
+                Age, weight, and health history are some of the most important factors when it comes to understanding your long-term wellness.
               </p>
             </div>
           </div>
@@ -494,7 +572,7 @@ export function RiskAssessmentForm() {
         >
           <div className="grid gap-5 md:grid-cols-2">
             <MetricField
-              description="Input a recent fasting or clinical reading."
+              description="Use a recent fasting test result if you have one."
               error={errors.glucose?.message}
               id="glucose"
               label="Glucose (mg/dL)"
@@ -502,7 +580,7 @@ export function RiskAssessmentForm() {
               register={register}
             />
             <MetricField
-              description="Input systolic blood pressure in mmHg."
+              description="Enter your top (systolic) blood pressure number."
               error={errors.bloodPressure?.message}
               id="bloodPressure"
               label="Blood pressure (mmHg)"
@@ -524,7 +602,7 @@ export function RiskAssessmentForm() {
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="grid gap-5 md:grid-cols-2">
               <MetricField
-                description="Enter 0 if unknown; the algorithm will apply median imputation."
+                description="Enter 0 if you don't know this number. We'll use a standard average."
                 error={errors.skinThickness?.message}
                 id="skinThickness"
                 label="Skin thickness (mm)"
@@ -532,7 +610,7 @@ export function RiskAssessmentForm() {
                 register={register}
               />
               <MetricField
-                description="Enter 0 if unknown; the algorithm will apply median imputation."
+                description="Enter 0 if you don't know this number. We'll use a standard average."
                 error={errors.insulin?.message}
                 id="insulin"
                 label="Insulin"
@@ -541,10 +619,10 @@ export function RiskAssessmentForm() {
               />
               <div className="md:col-span-2">
                 <MetricField
-                  description="A genetic predisposition metric. Typical clinical values fall between 0.1 and 1.5."
+                  description="A score representing your family history of diabetes. Usually falls between 0.1 and 1.5."
                   error={errors.diabetesPedigreeFunction?.message}
                   id="diabetesPedigreeFunction"
-                  label="Diabetes pedigree function"
+                  label="Family History Score"
                   placeholder="0.47"
                   register={register}
                   step={0.01}
@@ -556,13 +634,13 @@ export function RiskAssessmentForm() {
               {[
                 {
                   icon: FlaskConical,
-                  title: "Automated Imputation",
-                  copy: "Missing physiological values are gracefully handled using median substitution to ensure uninterrupted algorithm execution.",
+                  title: "Missing info? No problem",
+                  copy: "If you aren't sure about some of these specific details, just enter 0. The system will fill in the gaps with safe, standard averages.",
                 },
                 {
                   icon: Sparkles,
-                  title: "Synergistic Output",
-                  copy: "The backend calculates independent probabilities and evaluates their joint Copula distributions for superior predictive accuracy.",
+                  title: "Connecting the dots",
+                  copy: "By looking at all these numbers together, we can give you a much better picture of your health than looking at just one number alone.",
                 },
               ].map(({ copy, icon: Icon, title }) => (
                 <div
@@ -619,9 +697,9 @@ export function RiskAssessmentForm() {
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">What happens next</p>
                 <div className="mt-4 grid gap-3">
                   {[
-                    "The system will validate your clinical inputs against the expected algorithmic parameters.",
-                    "The data is processed through the logistic regression model to calculate independent marginal probabilities.",
-                    "Copula functions are applied to determine the joint risk, generating the final personalized clinical insights.",
+                    "We'll do a quick check to make sure your answers are ready to go.",
+                    "Our system will securely review your health factors together.",
+                    "You'll get a clear, easy-to-read summary of your metabolic wellness on the next screen.",
                   ].map((item) => (
                     <div
                       key={item}
@@ -634,7 +712,7 @@ export function RiskAssessmentForm() {
               </div>
 
               <div className="rounded-[30px] border border-cyan-300/20 bg-cyan-300/10 px-4 py-4 text-sm leading-6 text-cyan-50 shadow-[0_16px_40px_rgba(2,6,23,0.24)]">
-                Important: This algorithm serves as an educational screening aid. Elevated risk scores must be confirmed via formal laboratory testing and clinical consultation.
+                Important: These results are to help you understand your health better. Please share any concerns or questions you have with your healthcare provider.
               </div>
             </div>
           </div>
@@ -711,9 +789,9 @@ export function RiskAssessmentForm() {
 
           <div className="glass-card rounded-[32px] p-4 shadow-[0_24px_70px_rgba(15,23,42,0.16)] sm:flex sm:items-center sm:justify-between sm:p-5">
             <div>
-              <p className="text-lg font-semibold text-white">Need to adjust clinical metrics?</p>
+              <p className="text-lg font-semibold text-white">Need to update an answer?</p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
-                Jump back to the review step to modify the patient data, or reset the wizard for a new assessment.
+                Go back to the review step to fix a typo, or start over from the beginning.
               </p>
             </div>
             <div className="mt-4 flex flex-col gap-3 sm:mt-0 sm:flex-row">
@@ -753,8 +831,8 @@ export function RiskAssessmentForm() {
               <p className="text-lg font-semibold text-white">{currentStepConfig.title}</p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
                 {isReviewStep
-                  ? "Ready to process the data through the Machine Learning and Copula models."
-                  : "Proceed sequentially to ensure the mathematical model receives the correct input vector."}
+                  ? "Whenever you're ready, let's get your personalized health insights."
+                  : "Move through the steps in order to complete your assessment."}
               </p>
             </div>
 
@@ -769,7 +847,7 @@ export function RiskAssessmentForm() {
               {isReviewStep ? (
                 <button className={primaryButtonClassName} disabled={isSubmitting} type="submit">
                   {isSubmitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {isSubmitting ? "Processing data" : "Calculate Joint Risk"}
+                  {isSubmitting ? "Loading results" : "Get My Results"}
                 </button>
               ) : (
                 <button
