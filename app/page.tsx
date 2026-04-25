@@ -37,7 +37,7 @@ export default function HomePage() {
             Secure & private health screening
           </div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Understand Your Diabetes Risk
+            DiaVision | Diabetes risk predictor
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
             This tool helps you understand your potential risk for developing diabetes. By answering a few simple questions about your health, you'll receive personalized insights to help you make informed lifestyle choices.
