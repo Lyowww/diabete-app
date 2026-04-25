@@ -5,25 +5,23 @@ import { RiskAssessmentForm } from "@/components/risk-assessment-form";
 
 const highlights = [
   {
-    title: "Model-aligned intake flow",
-    copy: "The questionnaire now collects the eight measurements used by the supplied Python model instead of proxy lifestyle inputs.",
+    title: "Precise Medical Model",
+    copy: "The questionnaire collects the exact clinical risk factors and patient data required for the underlying logistic regression model to function with maximum accuracy.",
     icon: Activity,
   },
   {
-    title: "Gauge-style final result",
-    copy: "The last screen is a bold visual result page with a risk gauge, summary, and next-step recommendations.",
-    icon: Stethoscope,git add .
-git commit -m "new change"
-git push
+    title: "Personalized Insights",
+    copy: "The final screen provides a visual risk gauge, a comprehensive summary, and tailored preventive recommendations for both the patient and the healthcare provider.",
+    icon: Stethoscope,
   },
   {
-    title: "Embedded model fallback",
-    copy: "The app can run the shared Python-model coefficients server-side even when no external prediction API is configured.",
+    title: "Machine Learning Core",
+    copy: "The application relies on a robust Logistic Regression algorithm to securely calculate the independent (marginal) probabilities of individual medical complications.",
     icon: ShieldCheck,
   },
   {
-    title: "Server-side prediction adapter",
-    copy: "If you later plug in a separate prediction API, the same route can forward requests without exposing secrets to the browser.",
+    title: "Joint Risk Evaluation",
+    copy: "Beyond independent probabilities, the system utilizes Copula functions to mathematically model the dependencies and simultaneous development risk of multiple complications.",
     icon: Sparkles,
   },
 ];
@@ -36,15 +34,13 @@ export default function HomePage() {
       <section className="relative mx-auto max-w-7xl px-6 pb-12 pt-10 sm:px-8 lg:px-10 lg:pb-16 lg:pt-16">
         <div className="max-w-3xl">
           <div className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-1.5 text-sm text-cyan-100">
-            Secure step-by-step diabetes screening
+            Secure metabolic risk assessment
           </div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Eriiiiiiiiiikkkkkkkkkkkkkkkk
+            Intelligent Risk Assessment System
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            DiaVision now walks users through the exact measurements used by the underlying Pima-based logistic model,
-            then lands them on a clear gauge-style result screen with server-side prediction and room for a future
-            external API.
+            This application calculates the joint risk of developing complications associated with metabolic syndrome and diabetes. Powered by Machine Learning and Copula theory, the algorithm provides personalized insights to support clinical decision-making.
           </p>
         </div>
 
@@ -63,7 +59,7 @@ export default function HomePage() {
 
       <section className="relative mx-auto max-w-7xl px-6 pb-16 sm:px-8 lg:px-10 lg:pb-24">
         <div className="mb-6">
-          <DisclaimerCard body="This app is designed for screening support and education. It does not provide a diagnosis, emergency guidance, or a substitute for clinician-led testing." />
+          <DisclaimerCard body="Important Notice: This application was developed for research purposes and serves as a Clinical Decision Support System (CDSS). It is strictly for educational and screening purposes and does not replace a formal clinical diagnosis or treatment plan provided by a certified healthcare professional." />
         </div>
 
         <RiskAssessmentForm />
