@@ -174,6 +174,7 @@ function MetricField({
   id,
   inputMode = "decimal",
   label,
+  normalRange,
   placeholder,
   register,
   step,
@@ -183,6 +184,7 @@ function MetricField({
   id: StepField;
   inputMode?: "decimal" | "numeric";
   label: string;
+  normalRange?: string; // Ավելացված է նորմայի պարամետրը
   placeholder: string;
   register: UseFormRegister<RiskFormValues>;
   step?: number;
@@ -203,6 +205,11 @@ function MetricField({
         {...register(id, { valueAsNumber: true })}
       />
       {description ? <p className="mt-2 text-xs leading-5 text-slate-400">{description}</p> : null}
+      {normalRange ? (
+        <p className="mt-1 text-[11px] font-medium tracking-wide text-emerald-300/90">
+          Normal range: {normalRange}
+        </p>
+      ) : null}
       <FieldError message={error} />
     </div>
   );
@@ -467,6 +474,7 @@ export function RiskAssessmentForm() {
               error={errors.bmi?.message}
               id="bmi"
               label="BMI"
+              normalRange="18.5 - 24.9"
               placeholder="32.3"
               register={register}
               step={0.1}
@@ -498,6 +506,7 @@ export function RiskAssessmentForm() {
               error={errors.glucose?.message}
               id="glucose"
               label="Glucose (mg/dL)"
+              normalRange="70 - 99 mg/dL (fasting)"
               placeholder="117"
               register={register}
             />
@@ -506,6 +515,7 @@ export function RiskAssessmentForm() {
               error={errors.bloodPressure?.message}
               id="bloodPressure"
               label="Blood pressure (mmHg)"
+              normalRange="90 - 120 mmHg (systolic)"
               placeholder="72"
               register={register}
             />
@@ -528,6 +538,7 @@ export function RiskAssessmentForm() {
                 error={errors.skinThickness?.message}
                 id="skinThickness"
                 label="Skin thickness (mm)"
+                normalRange="10 - 30 mm"
                 placeholder="29"
                 register={register}
               />
@@ -536,6 +547,7 @@ export function RiskAssessmentForm() {
                 error={errors.insulin?.message}
                 id="insulin"
                 label="Insulin"
+                normalRange="2.6 - 24.9 µIU/mL (fasting)"
                 placeholder="125"
                 register={register}
               />
