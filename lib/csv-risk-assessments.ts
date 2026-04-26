@@ -2,7 +2,7 @@ import "server-only";
 
 import { ObjectId } from "mongodb";
 
-import { getMongoClient } from "@/lib/mongodb";
+import { getMongoClient, getMongoDb } from "@/lib/mongodb";
 import { RISK_ASSESSMENTS_COLLECTION } from "@/lib/persist-assessment";
 import type { PredictionResult, RiskAssessmentInput } from "@/types/prediction";
 
@@ -68,8 +68,13 @@ export async function getRiskAssessmentsCsvString(): Promise<{ csv: string; rowC
     throw new Error("MONGODB_URI not set");
   }
 
+  const db = getMongoDb();
+  if (!db) {
+    throw new Error("MONGODB_URI not set");
+  }
+
   await client.connect();
-  const collection = client.db().collection<StoredAssessment>(RISK_ASSESSMENTS_COLLECTION);
+  const collection = db.collection<StoredAssessment>(RISK_ASSESSMENTS_COLLECTION);
   const documents = await collection.find().sort({ storedAt: -1 }).toArray();
 
   const header = COLUMNS.map((c) => c.key).join(",");

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getRiskAssessmentsCsvString } from "@/lib/csv-risk-assessments";
 import { isExportRequestAuthorized } from "@/lib/export-request-auth";
-import { getMongoClient } from "@/lib/mongodb";
+import { getMongoDb } from "@/lib/mongodb";
 import en from "@/locales/en.json";
 
 export const runtime = "nodejs";
@@ -14,7 +14,7 @@ function jsonError(message: string, status: number) {
 }
 
 export async function GET(request: Request) {
-  if (!getMongoClient()) {
+  if (!getMongoDb()) {
     return jsonError(messages.noDb, 503);
   }
 

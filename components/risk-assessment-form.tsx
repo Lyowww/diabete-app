@@ -114,6 +114,18 @@ const fieldToStep: Record<StepField, number> = {
   diabetesPedigreeFunction: 3,
 };
 
+/** Neutral DOM `name` values (not medical terms) so browsers and extensions do not autofill. */
+const METRIC_INPUT_DOM_NAME: Record<StepField, string> = {
+  age: "m01",
+  pregnancies: "m02",
+  bmi: "m03",
+  glucose: "m04",
+  bloodPressure: "m05",
+  skinThickness: "m06",
+  insulin: "m07",
+  diabetesPedigreeFunction: "m08",
+};
+
 const reviewStepIndex = wizardSteps.findIndex((step) => step.id === "review");
 const resultStepIndex = wizardSteps.findIndex((step) => step.id === "result");
 
@@ -191,20 +203,30 @@ function MetricField({
   register: UseFormRegister<RiskFormValues>;
   step?: number;
 }) {
+  const inputId = `assessment-metric-${id}`;
+
   return (
     <div>
-      <label className="text-sm font-medium text-slate-200" htmlFor={id}>
+      <label className="text-sm font-medium text-slate-200" htmlFor={inputId}>
         {label}
       </label>
       <input
         aria-invalid={Boolean(error)}
+        autoCapitalize="none"
+        autoComplete="off"
+        autoCorrect="off"
         className={inputClassName}
-        id={id}
+        data-1p-ignore
+        data-form-type="other"
+        data-lpignore="true"
+        id={inputId}
         inputMode={inputMode}
         placeholder={placeholder}
+        spellCheck={false}
         step={step}
         type="number"
         {...register(id, { valueAsNumber: true })}
+        name={METRIC_INPUT_DOM_NAME[id]}
       />
       {normalRange && normalRangePrefix ? (
         <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -786,7 +808,7 @@ export function RiskAssessmentForm() {
           </div>
         </div>
       ) : (
-        <form className="mt-6 space-y-6" onSubmit={onSubmit}>
+        <form autoComplete="off" className="mt-6 space-y-6" onSubmit={onSubmit}>
           {renderStepContent()}
 
           {serverError ? (

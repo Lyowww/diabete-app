@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getMongoClient } from "@/lib/mongodb";
+import { getMongoClient, getMongoDb } from "@/lib/mongodb";
 import type { PredictionResult, RiskAssessmentInput } from "@/types/prediction";
 
 export const RISK_ASSESSMENTS_COLLECTION = "risk_assessments";
@@ -20,7 +20,10 @@ export async function persistRiskAssessment(
 
   try {
     await client.connect();
-    const db = client.db();
+    const db = getMongoDb();
+    if (!db) {
+      return;
+    }
     await db.collection(RISK_ASSESSMENTS_COLLECTION).insertOne({
       input,
       result,
