@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
 import "./globals.css";
+import en from "@/locales/en.json";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,9 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "DiaVision | Diabetes Risk Predictor",
-  description:
-    "A polished, Vercel-ready diabetes risk predictor with a secure server-side prediction adapter and patient-friendly results.",
+  title: en.layout.title,
+  description: en.layout.description,
 };
 
 export default function RootLayout({

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 
+import en from "@/locales/en.json";
+import { persistRiskAssessment } from "@/lib/persist-assessment";
 import { PredictionProviderError, generatePrediction } from "@/lib/prediction-client";
 import { predictionRequestSchema } from "@/lib/validation";
 
 export const runtime = "nodejs";
+
+const api = en.api;
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +17,7 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         {
-          error: "Please review the highlighted answers and try again.",
+          error: api.reviewFields,
           fieldErrors: parsed.error.flatten().fieldErrors,
         },
         { status: 400 },
@@ -21,27 +25,22 @@ export async function POST(request: Request) {
     }
 
     const result = await generatePrediction(parsed.data.input);
+    await persistRiskAssessment(parsed.data.input, result);
     return NextResponse.json({ result });
   } catch (error) {
     if (error instanceof SyntaxError) {
-      return NextResponse.json({ error: "Request body must be valid JSON." }, { status: 400 });
+      return NextResponse.json({ error: api.invalidJson }, { status: 400 });
     }
 
     if (error instanceof PredictionProviderError) {
       return NextResponse.json(
         {
-          error:
-            error.statusCode === 504
-              ? "The prediction service took too long to respond."
-              : "The prediction service is currently unavailable.",
+          error: error.statusCode === 504 ? api.timeout : api.unavailable,
         },
         { status: error.statusCode },
       );
     }
 
-    return NextResponse.json(
-      { error: "We could not complete the assessment right now. Please try again shortly." },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: api.generic }, { status: 500 });
   }
 }

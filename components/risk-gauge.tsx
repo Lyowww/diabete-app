@@ -8,6 +8,7 @@ import type { RiskLevel } from "@/types/prediction";
 type RiskGaugeProps = {
   probability: number;
   riskLevel: RiskLevel;
+  labels: { low: string; middle: string; high: string; riskPill: string };
 };
 
 const segmentColors = [
@@ -25,28 +26,22 @@ const segmentColors = [
   "#f43f5e",
 ] as const;
 
-const riskTone: Record<
-  RiskLevel,
-  { accent: string; glow: string; label: string; pillFill: string; pillStroke: string }
-> = {
+const riskTone: Record<RiskLevel, { accent: string; glow: string; pillFill: string; pillStroke: string }> = {
   low: {
     accent: "#2dd4bf",
     glow: "rgba(45,212,191,0.18)",
-    label: "risk",
     pillFill: "rgba(45,212,191,0.14)",
     pillStroke: "rgba(45,212,191,0.36)",
   },
   moderate: {
     accent: "#f59e0b",
     glow: "rgba(245,158,11,0.16)",
-    label: "risk",
     pillFill: "rgba(245,158,11,0.14)",
     pillStroke: "rgba(245,158,11,0.34)",
   },
   high: {
     accent: "#f43f5e",
     glow: "rgba(244,63,94,0.16)",
-    label: "risk",
     pillFill: "rgba(244,63,94,0.14)",
     pillStroke: "rgba(244,63,94,0.34)",
   },
@@ -75,7 +70,7 @@ function describeArc(cx: number, cy: number, r: number, startDeg: number, endDeg
   return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
 }
 
-export function RiskGauge({ probability, riskLevel }: RiskGaugeProps) {
+export function RiskGauge({ probability, riskLevel, labels }: RiskGaugeProps) {
   const [displayProbability, setDisplayProbability] = useState(0);
   const rafRef = useRef<number | null>(null);
   const displayProbabilityRef = useRef(0);
@@ -237,13 +232,13 @@ export function RiskGauge({ probability, riskLevel }: RiskGaugeProps) {
         })}
 
         <text fill="#cbd5e1" fontSize="28" fontWeight="700" textAnchor="end" x="74" y="194">
-          Low
+          {labels.low}
         </text>
         <text fill="#e2e8f0" fontSize="26" fontWeight="700" textAnchor="middle" x="210" y="50">
-          Middle
+          {labels.middle}
         </text>
         <text fill="#cbd5e1" fontSize="28" fontWeight="700" textAnchor="start" x="346" y="194">
-          High
+          {labels.high}
         </text>
 
         <polygon
@@ -285,7 +280,7 @@ export function RiskGauge({ probability, riskLevel }: RiskGaugeProps) {
           y="203"
         />
         <text fill={tone.accent} fontSize="12" fontWeight="700" letterSpacing="1" textAnchor="middle" x={CENTER_X} y="219">
-          {tone.label.toUpperCase()}
+          {labels.riskPill.toUpperCase()}
         </text>
       </svg>
     </div>

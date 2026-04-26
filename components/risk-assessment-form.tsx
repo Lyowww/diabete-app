@@ -14,11 +14,12 @@ import {
   Ruler,
   Sparkles,
 } from "lucide-react";
-import { useForm, type UseFormRegister } from "react-hook-form";
+import { useForm, type DefaultValues, type Resolver, type UseFormRegister } from "react-hook-form";
 
 import { ResultCard } from "@/components/result-card";
 import { cn } from "@/lib/utils";
 import { riskAssessmentSchema, type RiskFormValues } from "@/lib/validation";
+import en from "@/locales/en.json";
 import type { PredictionResult } from "@/types/prediction";
 
 type StepField = keyof RiskFormValues;
@@ -33,74 +34,71 @@ type WizardStep = {
   fields?: readonly StepField[];
 };
 
-const DEFAULT_VALUES: RiskFormValues = {
-  pregnancies: 2,
-  glucose: 117,
-  bloodPressure: 72,
-  skinThickness: 29,
-  insulin: 125,
-  bmi: 32.3,
-  diabetesPedigreeFunction: 0.47,
-  age: 33,
+const t = en.form;
+const w = t.wizard;
+
+const EMPTY_FORM_DEFAULTS: DefaultValues<RiskFormValues> = {
+  pregnancies: undefined,
+  glucose: undefined,
+  bloodPressure: undefined,
+  skinThickness: undefined,
+  insulin: undefined,
+  diabetesPedigreeFunction: undefined,
+  age: undefined,
+  bmi: undefined,
 };
 
 const wizardSteps: readonly WizardStep[] = [
   {
     id: "welcome",
-    label: "Welcome",
-    shortLabel: "Start",
-    eyebrow: "Step 1",
-    title: "Welcome to Your Health Assessment",
-    description:
-      "This quick questionnaire will help you understand your diabetes risk. It takes just a few minutes to complete.",
+    label: w.welcome.label,
+    shortLabel: w.welcome.shortLabel,
+    eyebrow: w.welcome.eyebrow,
+    title: w.welcome.title,
+    description: w.welcome.description,
   },
   {
     id: "profile",
-    label: "About You",
-    shortLabel: "Profile",
-    eyebrow: "Step 2",
-    title: "Let's start with the basics",
-    description:
-      "Tell us a bit about yourself. Your age and body metrics give us a helpful starting point.",
+    label: w.profile.label,
+    shortLabel: w.profile.shortLabel,
+    eyebrow: w.profile.eyebrow,
+    title: w.profile.title,
+    description: w.profile.description,
     fields: ["age", "pregnancies", "bmi"],
   },
   {
     id: "labs",
-    label: "Health Numbers",
-    shortLabel: "Labs",
-    eyebrow: "Step 3",
-    title: "Your recent lab results",
-    description:
-      "Enter your latest blood sugar and blood pressure readings. These are great indicators of your current wellness.",
+    label: w.labs.label,
+    shortLabel: w.labs.shortLabel,
+    eyebrow: w.labs.eyebrow,
+    title: w.labs.title,
+    description: w.labs.description,
     fields: ["glucose", "bloodPressure"],
   },
   {
     id: "measurements",
-    label: "More Details",
-    shortLabel: "More",
-    eyebrow: "Step 4",
-    title: "Additional health details",
-    description:
-      "A few more details help make your results as accurate as possible. Don't worry if you don't know every single one.",
+    label: w.measurements.label,
+    shortLabel: w.measurements.shortLabel,
+    eyebrow: w.measurements.eyebrow,
+    title: w.measurements.title,
+    description: w.measurements.description,
     fields: ["skinThickness", "insulin", "diabetesPedigreeFunction"],
   },
   {
     id: "review",
-    label: "Review",
-    shortLabel: "Review",
-    eyebrow: "Step 5",
-    title: "Review your answers",
-    description:
-      "Take a moment to check the details you've entered before we generate your personalized health insights.",
+    label: w.review.label,
+    shortLabel: w.review.shortLabel,
+    eyebrow: w.review.eyebrow,
+    title: w.review.title,
+    description: w.review.description,
   },
   {
     id: "result",
-    label: "Your Results",
-    shortLabel: "Result",
-    eyebrow: "Step 6",
-    title: "Your Health Overview",
-    description:
-      "Here is a summary of your diabetes risk assessment based on the information you provided.",
+    label: w.result.label,
+    shortLabel: w.result.shortLabel,
+    eyebrow: w.result.eyebrow,
+    title: w.result.title,
+    description: w.result.description,
   },
 ];
 
@@ -209,7 +207,11 @@ function MetricField({
   );
 }
 
-function formatReviewValue(field: StepField, value: number) {
+function formatReviewValue(field: StepField, value: number | undefined) {
+  if (value === undefined || Number.isNaN(value)) {
+    return t.missingValue;
+  }
+
   if (field === "bmi") {
     return value.toFixed(1);
   }
@@ -236,8 +238,8 @@ export function RiskAssessmentForm() {
     setError,
     trigger,
   } = useForm<RiskFormValues>({
-    resolver: zodResolver(riskAssessmentSchema),
-    defaultValues: DEFAULT_VALUES,
+    resolver: zodResolver(riskAssessmentSchema) as Resolver<RiskFormValues>,
+    defaultValues: EMPTY_FORM_DEFAULTS,
   });
 
   const isReviewStep = currentStep === reviewStepIndex;
@@ -246,35 +248,51 @@ export function RiskAssessmentForm() {
   const progressPercent = ((currentStep + 1) / wizardSteps.length) * 100;
   const values = getValues();
 
+  const rw = w.review;
   const reviewSections = [
     {
-      title: "About You",
+      title: rw.sectionAbout,
       items: [
-        { label: "Age", value: `${values.age} years` },
-        { label: "Pregnancies", value: formatReviewValue("pregnancies", values.pregnancies) },
-        { label: "BMI", value: formatReviewValue("bmi", values.bmi) },
+        {
+          label: rw.summaryAge,
+          value: `${formatReviewValue("age", values.age)}${values.age === undefined || Number.isNaN(values.age) ? "" : ` ${rw.ageUnit}`}`,
+        },
+        { label: rw.summaryPregnancies, value: formatReviewValue("pregnancies", values.pregnancies) },
+        { label: rw.summaryBmi, value: formatReviewValue("bmi", values.bmi) },
       ],
     },
     {
-      title: "Health Numbers",
+      title: rw.sectionHealth,
       items: [
-        { label: "Glucose", value: `${formatReviewValue("glucose", values.glucose)} mg/dL` },
         {
-          label: "Blood pressure",
-          value: `${formatReviewValue("bloodPressure", values.bloodPressure)} mmHg`,
+          label: rw.summaryGlucose,
+          value:
+            values.glucose === undefined || Number.isNaN(values.glucose)
+              ? t.missingValue
+              : `${formatReviewValue("glucose", values.glucose)} ${rw.glucoseUnit}`,
+        },
+        {
+          label: rw.summaryBloodPressure,
+          value:
+            values.bloodPressure === undefined || Number.isNaN(values.bloodPressure)
+              ? t.missingValue
+              : `${formatReviewValue("bloodPressure", values.bloodPressure)} ${rw.bpUnit}`,
         },
       ],
     },
     {
-      title: "More Details",
+      title: rw.sectionMore,
       items: [
         {
-          label: "Skin thickness",
-          value: `${formatReviewValue("skinThickness", values.skinThickness)} mm`,
+          label: rw.summarySkin,
+          value:
+            values.skinThickness === undefined || Number.isNaN(values.skinThickness)
+              ? t.missingValue
+              : `${formatReviewValue("skinThickness", values.skinThickness)} ${rw.skinUnit}`,
         },
-        { label: "Insulin", value: formatReviewValue("insulin", values.insulin) },
+        { label: rw.summaryInsulin, value: formatReviewValue("insulin", values.insulin) },
         {
-          label: "Family History Score",
+          label: rw.summaryDpf,
           value: formatReviewValue("diabetesPedigreeFunction", values.diabetesPedigreeFunction),
         },
       ],
@@ -308,7 +326,7 @@ export function RiskAssessmentForm() {
   };
 
   const handleStartOver = () => {
-    reset(DEFAULT_VALUES);
+    reset(EMPTY_FORM_DEFAULTS);
     clearErrors();
     setResult(null);
     setServerError(null);
@@ -359,19 +377,20 @@ export function RiskAssessmentForm() {
           scrollWizardIntoView();
         }
 
-        setServerError(payload.error ?? "We couldn't complete the assessment right now. Please try again.");
+        setServerError(payload.error ?? t.errors.serverGeneric);
         return;
       }
 
       setResult(payload.result);
     } catch {
       setCurrentStep(resultStepIndex);
-      setServerError("There was a connection issue. Please check your internet and try again.");
+      setServerError(t.errors.connection);
     }
   });
 
   const renderStepContent = () => {
     if (currentStepConfig.id === "welcome") {
+      const h = w.welcome;
       return (
         <StepCard
           description={currentStepConfig.description}
@@ -383,18 +402,18 @@ export function RiskAssessmentForm() {
               {[
                 {
                   icon: ClipboardList,
-                  title: "Quick & Easy",
-                  copy: "Answer a few straightforward questions about your health history and recent lab tests.",
+                  title: h.cards.quick.title,
+                  copy: h.cards.quick.copy,
                 },
                 {
                   icon: FlaskConical,
-                  title: "Smart Analysis",
-                  copy: "We'll securely analyze your numbers to give you a personalized overview of your risk profile.",
+                  title: h.cards.smart.title,
+                  copy: h.cards.smart.copy,
                 },
                 {
                   icon: Activity,
-                  title: "Holistic View",
-                  copy: "See how different factors like weight, age, and blood sugar work together to impact your health.",
+                  title: h.cards.holistic.title,
+                  copy: h.cards.holistic.copy,
                 },
               ].map(({ copy, icon: Icon, title }) => (
                 <div
@@ -411,14 +430,9 @@ export function RiskAssessmentForm() {
             </div>
 
             <div className="rounded-[30px] border border-white/10 bg-slate-950/45 p-5 shadow-[0_16px_40px_rgba(2,6,23,0.24)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">Tips for success</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">{h.tipsTitle}</p>
               <div className="mt-4 grid gap-3">
-                {[
-                  "Have your most recent lab results handy for the best accuracy (like your blood sugar and blood pressure).",
-                  "If you have never been pregnant or it doesn't apply to you, simply enter 0 for the pregnancy count.",
-                  "Don't worry if you don't know your exact insulin or skin thickness levels. Just enter 0, and we'll use a standard average.",
-                  "We'll ask about your family history to better understand your genetic background related to diabetes.",
-                ].map((item) => (
+                {h.tips.map((item) => (
                   <div
                     key={item}
                     className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm leading-6 text-slate-300"
@@ -429,7 +443,7 @@ export function RiskAssessmentForm() {
               </div>
 
               <div className="mt-5 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm leading-6 text-cyan-50">
-                Remember, this tool is here to educate and inform. It is not a replacement for a doctor's visit or a formal medical diagnosis.
+                {h.tipsFooter}
               </div>
             </div>
           </div>
@@ -438,6 +452,9 @@ export function RiskAssessmentForm() {
     }
 
     if (currentStepConfig.id === "profile") {
+      const p = w.profile;
+      const f = t.fields;
+      const ph = t.placeholders;
       return (
         <StepCard
           description={currentStepConfig.description}
@@ -446,29 +463,29 @@ export function RiskAssessmentForm() {
         >
           <div className="grid gap-5 md:grid-cols-2">
             <MetricField
-              description="Please enter your current age in years."
+              description={p.ageDescription}
               error={errors.age?.message}
               id="age"
               inputMode="numeric"
-              label="Age"
-              placeholder="33"
+              label={f.age.label}
+              placeholder={ph.age}
               register={register}
             />
             <MetricField
-              description="Enter 0 if this doesn't apply to you or if you've never been pregnant."
+              description={p.pregnanciesDescription}
               error={errors.pregnancies?.message}
               id="pregnancies"
               inputMode="numeric"
-              label="Pregnancy count"
-              placeholder="2"
+              label={f.pregnancies.label}
+              placeholder={ph.pregnancies}
               register={register}
             />
             <MetricField
-              description="Your Body Mass Index (BMI) helps us understand your overall physical profile."
+              description={p.bmiDescription}
               error={errors.bmi?.message}
               id="bmi"
-              label="BMI"
-              placeholder="32.3"
+              label={f.bmi.label}
+              placeholder={ph.bmi}
               register={register}
               step={0.1}
             />
@@ -476,9 +493,9 @@ export function RiskAssessmentForm() {
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-200">
                 <Ruler className="h-5 w-5" />
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-white">Why we ask for this</h3>
+              <h3 className="mt-4 text-lg font-semibold text-white">{p.sidebarTitle}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Age, weight, and health history are some of the most important baseline factors when assessing diabetes risk.
+                {p.sidebarBody}
               </p>
             </div>
           </div>
@@ -487,6 +504,9 @@ export function RiskAssessmentForm() {
     }
 
     if (currentStepConfig.id === "labs") {
+      const l = w.labs;
+      const f = t.fields;
+      const ph = t.placeholders;
       return (
         <StepCard
           description={currentStepConfig.description}
@@ -495,19 +515,19 @@ export function RiskAssessmentForm() {
         >
           <div className="grid gap-5 md:grid-cols-2">
             <MetricField
-              description="Use a recent fasting test result if you have one."
+              description={l.glucoseDescription}
               error={errors.glucose?.message}
               id="glucose"
-              label="Glucose (mg/dL)"
-              placeholder="117"
+              label={f.glucose.label}
+              placeholder={ph.glucose}
               register={register}
             />
             <MetricField
-              description="Enter your top (systolic) blood pressure number."
+              description={l.bloodPressureDescription}
               error={errors.bloodPressure?.message}
               id="bloodPressure"
-              label="Blood pressure (mmHg)"
-              placeholder="72"
+              label={f.bloodPressure.label}
+              placeholder={ph.bloodPressure}
               register={register}
             />
           </div>
@@ -516,6 +536,9 @@ export function RiskAssessmentForm() {
     }
 
     if (currentStepConfig.id === "measurements") {
+      const m = w.measurements;
+      const f = t.fields;
+      const ph = t.placeholders;
       return (
         <StepCard
           description={currentStepConfig.description}
@@ -525,28 +548,28 @@ export function RiskAssessmentForm() {
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="grid gap-5 md:grid-cols-2">
               <MetricField
-                description="Enter 0 if you don't know this number. We'll use a standard average."
+                description={m.skinDescription}
                 error={errors.skinThickness?.message}
                 id="skinThickness"
-                label="Skin thickness (mm)"
-                placeholder="29"
+                label={f.skinThickness.label}
+                placeholder={ph.skinThickness}
                 register={register}
               />
               <MetricField
-                description="Enter 0 if you don't know this number. We'll use a standard average."
+                description={m.insulinDescription}
                 error={errors.insulin?.message}
                 id="insulin"
-                label="Insulin"
-                placeholder="125"
+                label={f.insulin.label}
+                placeholder={ph.insulin}
                 register={register}
               />
               <div className="md:col-span-2">
                 <MetricField
-                  description="A score representing your family history of diabetes. Usually falls between 0.1 and 1.5."
+                  description={m.dpfDescription}
                   error={errors.diabetesPedigreeFunction?.message}
                   id="diabetesPedigreeFunction"
-                  label="Family History Score"
-                  placeholder="0.47"
+                  label={f.diabetesPedigreeFunction.label}
+                  placeholder={ph.diabetesPedigreeFunction}
                   register={register}
                   step={0.01}
                 />
@@ -557,13 +580,13 @@ export function RiskAssessmentForm() {
               {[
                 {
                   icon: FlaskConical,
-                  title: "Missing info? No problem",
-                  copy: "If you aren't sure about some of these specific details, just enter 0. The system will fill in the gaps with safe, standard averages.",
+                  title: m.asideMissing.title,
+                  copy: m.asideMissing.copy,
                 },
                 {
                   icon: Sparkles,
-                  title: "Connecting the dots",
-                  copy: "By looking at all these numbers together, we can give you a much better picture of your health than looking at just one number alone.",
+                  title: m.asideConnecting.title,
+                  copy: m.asideConnecting.copy,
                 },
               ].map(({ copy, icon: Icon, title }) => (
                 <div
@@ -584,6 +607,7 @@ export function RiskAssessmentForm() {
     }
 
     if (currentStepConfig.id === "review") {
+      const r = w.review;
       return (
         <StepCard
           description={currentStepConfig.description}
@@ -617,13 +641,9 @@ export function RiskAssessmentForm() {
 
             <div className="space-y-4">
               <div className="rounded-[30px] border border-white/10 bg-slate-950/45 p-5 shadow-[0_16px_40px_rgba(2,6,23,0.24)]">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">What happens next</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">{r.whatNext}</p>
                 <div className="mt-4 grid gap-3">
-                  {[
-                    "We'll do a quick check to make sure your answers are ready to go.",
-                    "Our system will securely review your health factors together.",
-                    "You'll get a clear, easy-to-read summary of your potential diabetes risk on the next screen.",
-                  ].map((item) => (
+                  {r.nextSteps.map((item) => (
                     <div
                       key={item}
                       className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm leading-6 text-slate-300"
@@ -635,7 +655,7 @@ export function RiskAssessmentForm() {
               </div>
 
               <div className="rounded-[30px] border border-cyan-300/20 bg-cyan-300/10 px-4 py-4 text-sm leading-6 text-cyan-50 shadow-[0_16px_40px_rgba(2,6,23,0.24)]">
-                Important: These results are to help you understand your health better. Please share any concerns or questions you have with your healthcare provider.
+                {r.reviewFooter}
               </div>
             </div>
           </div>
@@ -646,14 +666,20 @@ export function RiskAssessmentForm() {
     return <ResultCard error={serverError} isLoading={isSubmitting} result={result} />;
   };
 
+  const a = t.actions;
+  const pageTitle = t.pageOf
+    .replace("{current}", String(currentStep + 1))
+    .replace("{total}", String(wizardSteps.length))
+    .replace("{label}", currentStepConfig.label);
+
   return (
     <div className="mx-auto max-w-6xl" id="assessment-wizard">
       <div className="glass-card rounded-[36px] p-4 shadow-[0_24px_70px_rgba(15,23,42,0.16)] sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">Step-by-step flow</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">{t.flowEyebrow}</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-              Page {currentStep + 1} of {wizardSteps.length}: {currentStepConfig.label}
+              {pageTitle}
             </h2>
           </div>
         </div>
@@ -712,9 +738,9 @@ export function RiskAssessmentForm() {
 
           <div className="glass-card rounded-[32px] p-4 shadow-[0_24px_70px_rgba(15,23,42,0.16)] sm:flex sm:items-center sm:justify-between sm:p-5">
             <div>
-              <p className="text-lg font-semibold text-white">Need to update an answer?</p>
+              <p className="text-lg font-semibold text-white">{a.resultFooterTitle}</p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
-                Go back to the review step to fix a typo, or start over from the beginning.
+                {a.resultFooterBody}
               </p>
             </div>
             <div className="mt-4 flex flex-col gap-3 sm:mt-0 sm:flex-row">
@@ -725,7 +751,7 @@ export function RiskAssessmentForm() {
                 type="button"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Edit answers
+                {a.editAnswers}
               </button>
               <button
                 className={primaryButtonClassName}
@@ -734,7 +760,7 @@ export function RiskAssessmentForm() {
                 type="button"
               >
                 <RotateCcw className="h-4 w-4" />
-                Start over
+                {a.startOver}
               </button>
             </div>
           </div>
@@ -753,9 +779,7 @@ export function RiskAssessmentForm() {
             <div>
               <p className="text-lg font-semibold text-white">{currentStepConfig.title}</p>
               <p className="mt-1 text-sm leading-6 text-slate-300">
-                {isReviewStep
-                  ? "Whenever you're ready, let's get your personalized health insights."
-                  : "Move through the steps in order to complete your assessment."}
+                {isReviewStep ? a.footerTitleReview : a.footerTitleProgress}
               </p>
             </div>
 
@@ -763,14 +787,14 @@ export function RiskAssessmentForm() {
               {currentStep > 0 ? (
                 <button className={secondaryButtonClassName} onClick={handleBack} type="button">
                   <ChevronLeft className="h-4 w-4" />
-                  Back
+                  {a.back}
                 </button>
               ) : null}
 
               {isReviewStep ? (
                 <button className={primaryButtonClassName} disabled={isSubmitting} type="submit">
                   {isSubmitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {isSubmitting ? "Loading results" : "Get My Results"}
+                  {isSubmitting ? a.loadingResults : a.getResults}
                 </button>
               ) : (
                 <button
@@ -779,7 +803,11 @@ export function RiskAssessmentForm() {
                   onClick={handleAdvance}
                   type="button"
                 >
-                  {currentStep === 0 ? "Start assessment" : currentStep === 3 ? "Review inputs" : "Continue"}
+                  {currentStep === 0
+                    ? a.startAssessment
+                    : currentStep === 3
+                      ? a.reviewInputs
+                      : a.continue}
                   <ChevronRight className="h-4 w-4" />
                 </button>
               )}

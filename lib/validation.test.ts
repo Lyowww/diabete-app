@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import en from "@/locales/en.json";
 import { riskAssessmentSchema } from "@/lib/validation";
+
+const v = en.validation;
 
 describe("riskAssessmentSchema", () => {
   it("accepts a valid model-aligned adult profile", () => {
@@ -48,7 +51,7 @@ describe("riskAssessmentSchema", () => {
     expect(result.success).toBe(false);
 
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.glucose).toContain("Glucose must be greater than 0.");
+      expect(result.error.flatten().fieldErrors.glucose).toContain(v.glucose.min);
     }
   });
 
@@ -67,7 +70,25 @@ describe("riskAssessmentSchema", () => {
     expect(result.success).toBe(false);
 
     if (!result.success) {
-      expect(result.error.flatten().fieldErrors.age).toContain("Age must be at least 18.");
+      expect(result.error.flatten().fieldErrors.age).toContain(v.age.min);
+    }
+  });
+
+  it("rejects missing number fields", () => {
+    const result = riskAssessmentSchema.safeParse({
+      pregnancies: 2,
+      glucose: NaN,
+      bloodPressure: 72,
+      skinThickness: 29,
+      insulin: 125,
+      diabetesPedigreeFunction: 0.47,
+      age: 33,
+      bmi: 32.3,
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.glucose).toBeDefined();
     }
   });
 });

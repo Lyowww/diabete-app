@@ -1,17 +1,20 @@
-import { Activity, ArrowRight, CheckCircle2, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
+import { Activity, ArrowRight, CheckCircle2, ClipboardList, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
 
 import { RiskGauge } from "@/components/risk-gauge";
 import { cn, formatPercent } from "@/lib/utils";
+import en from "@/locales/en.json";
 import type { ContributorImpact, PredictionResult, RiskLevel } from "@/types/prediction";
 
-const riskPalette: Record<
+const copy = en.result;
+const i = copy.impact;
+
+const riskStyle: Record<
   RiskLevel,
   {
     badge: string;
     badgeShadow: string;
     accent: string;
     glowBg: string;
-    title: string;
   }
 > = {
   low: {
@@ -19,47 +22,51 @@ const riskPalette: Record<
     badgeShadow: "shadow-[0_0_24px_rgba(52,211,153,0.35)]",
     accent: "text-emerald-300",
     glowBg: "rgba(52,211,153,0.07)",
-    title: "Lower current risk profile",
   },
   moderate: {
     badge: "bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/30",
     badgeShadow: "shadow-[0_0_24px_rgba(251,191,36,0.35)]",
     accent: "text-amber-300",
     glowBg: "rgba(251,191,36,0.07)",
-    title: "Moderate current risk profile",
   },
   high: {
     badge: "bg-rose-400/15 text-rose-300 ring-1 ring-rose-400/30",
     badgeShadow: "shadow-[0_0_24px_rgba(251,113,133,0.35)]",
     accent: "text-rose-300",
     glowBg: "rgba(251,113,133,0.07)",
-    title: "Higher current risk profile",
   },
 };
 
-const impactConfig: Record<
-  ContributorImpact,
-  { label: string; badge: string; bars: number; barColor: string }
-> = {
+const impactConfig: Record<ContributorImpact, { label: string; badge: string; bars: number; barColor: string }> = {
   strong: {
-    label: "Strong",
+    label: i.strong.label,
     badge: "bg-rose-400/15 text-rose-300 ring-1 ring-rose-400/25",
     bars: 3,
     barColor: "bg-rose-400",
   },
   elevated: {
-    label: "Elevated",
+    label: i.elevated.label,
     badge: "bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/25",
     bars: 2,
     barColor: "bg-amber-400",
   },
   watch: {
-    label: "Watch",
+    label: i.watch.label,
     badge: "bg-cyan-400/15 text-cyan-300 ring-1 ring-cyan-400/25",
     bars: 1,
     barColor: "bg-cyan-400",
   },
 };
+
+function getRiskTitle(level: RiskLevel) {
+  if (level === "low") {
+    return copy.subtitles.low;
+  }
+  if (level === "high") {
+    return copy.subtitles.high;
+  }
+  return copy.subtitles.moderate;
+}
 
 function ImpactBars({ impact }: { impact: ContributorImpact }) {
   const { bars, barColor } = impactConfig[impact];
@@ -90,19 +97,13 @@ function Placeholder() {
     <div className="space-y-4 rounded-[28px] border border-white/10 bg-white/5 p-6">
       <div className="flex items-center gap-3 text-cyan-300">
         <Sparkles className="h-5 w-5" />
-        <p className="font-medium">Your risk snapshot will appear here.</p>
+        <p className="font-medium">{copy.placeholder.title}</p>
       </div>
       <p className="text-sm leading-6 text-slate-300">
-        Fill out the assessment to see a probability estimate, the biggest contributors, and follow-up suggestions you
-        can take into a clinical conversation.
+        {copy.placeholder.body}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
-        {[
-          "Server-side prediction requests",
-          "Clear risk categories and next steps",
-          "Embedded model when no external API is set",
-          "No health answers stored in this app",
-        ].map((item) => (
+        {copy.placeholder.bullets.map((item) => (
           <div
             key={item}
             className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-slate-300"
@@ -140,7 +141,7 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
       <div className="rounded-[28px] border border-rose-400/25 bg-rose-500/10 p-6 text-sm leading-6 text-rose-100">
         <div className="flex items-center gap-3 font-medium">
           <Stethoscope className="h-5 w-5" />
-          We could not complete the assessment
+          {copy.error.title}
         </div>
         <p className="mt-3">{error}</p>
       </div>
@@ -151,7 +152,9 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
     return <Placeholder />;
   }
 
-  const palette = riskPalette[result.riskLevel];
+  const palette = riskStyle[result.riskLevel];
+  const title = getRiskTitle(result.riskLevel);
+  const levelName = copy.riskLevelNames[result.riskLevel];
 
   return (
     <div className="space-y-6">
@@ -170,10 +173,10 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
         {/* Header row */}
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">Final result</p>
-            <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{palette.title}</h3>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">{copy.finalEyebrow}</p>
+            <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{title}</h3>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-              Predicted probability, risk tier, and the strongest drivers from the model.
+              {copy.header}
             </p>
           </div>
           <span
@@ -183,37 +186,20 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
               palette.badgeShadow,
             )}
           >
-            {result.riskLevel}
+            {levelName}
           </span>
         </div>
 
         {/* Gauge */}
         <div className="mt-6">
-          <RiskGauge probability={result.probability} riskLevel={result.riskLevel} />
+          <RiskGauge
+            labels={copy.gauge}
+            probability={result.probability}
+            riskLevel={result.riskLevel}
+          />
         </div>
 
-        {/* Stat tiles */}
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <div className="animate-scale-in delay-100 rounded-[24px] border border-white/[0.07] bg-slate-950/60 px-4 py-4 transition hover:border-white/[0.12]">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Probability</p>
-            <p className={cn("mt-3 text-3xl font-bold tracking-tight", palette.accent)}>
-              {formatPercent(result.probability)}
-            </p>
-          </div>
-          <div className="animate-scale-in delay-200 rounded-[24px] border border-white/[0.07] bg-slate-950/60 px-4 py-4 transition hover:border-white/[0.12]">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Confidence</p>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-white">
-              {formatPercent(result.confidence)}
-            </p>
-          </div>
-          <div className="animate-scale-in delay-300 rounded-[24px] border border-white/[0.07] bg-slate-950/60 px-4 py-4 transition hover:border-white/[0.12]">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Score</p>
-            <p className="mt-3 text-3xl font-bold tracking-tight text-white">
-              {result.score.toFixed(0)}
-              <span className="ml-1.5 text-base font-medium text-slate-500">/ {result.maxScore.toFixed(0)}</span>
-            </p>
-          </div>
-        </div>
+        
       </div>
 
       {/* ── Detail grid ─────────────────────────────────────── */}
@@ -226,7 +212,7 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
                 <Activity className="h-4 w-4" />
               </div>
-              <p className="font-medium text-white">Clinical-style summary</p>
+              <p className="font-medium text-white">{copy.clinicalTitle}</p>
             </div>
             <p className="mt-4 text-sm leading-7 text-slate-300">{result.summary}</p>
           </div>
@@ -237,7 +223,7 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
                 <ArrowRight className="h-4 w-4 text-cyan-300" />
               </div>
-              <p className="font-medium text-white">Recommended next steps</p>
+              <p className="font-medium text-white">{copy.recommendationsTitle}</p>
             </div>
             <div className="mt-4 grid gap-2.5">
               {result.recommendedActions.map((action, i) => (
@@ -264,7 +250,7 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
                 <ShieldCheck className="h-4 w-4 text-cyan-300" />
               </div>
-              <p className="font-medium text-white">Biggest contributors</p>
+              <p className="font-medium text-white">{copy.contributorsTitle}</p>
             </div>
             <div className="mt-4 grid gap-3">
               {result.contributors.map((contributor, i) => {
@@ -299,16 +285,49 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
             </div>
           </div>
 
+          {/* Reference ranges */}
+          <div className="animate-fade-in-up delay-300 rounded-[32px] border border-white/[0.08] bg-gradient-to-b from-slate-900/70 to-slate-950/80 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
+                <ClipboardList className="h-4 w-4 text-cyan-300" />
+              </div>
+              <p className="font-medium text-white">{copy.normalRanges.title}</p>
+            </div>
+            <dl className="mt-4 space-y-3">
+              {(
+                [
+                  "bmi",
+                  "glucose",
+                  "bloodPressure",
+                  "skinThickness",
+                  "insulin",
+                ] as const
+              ).map((key) => {
+                const row = copy.normalRanges[key];
+                return (
+                  <div
+                    key={key}
+                    className="flex flex-wrap items-baseline justify-between gap-2 rounded-2xl border border-white/[0.07] bg-slate-950/50 px-4 py-3"
+                  >
+                    <dt className="text-sm font-medium text-slate-200">{row.label}</dt>
+                    <dd className="text-right text-sm leading-6 text-slate-400">{row.value}</dd>
+                  </div>
+                );
+              })}
+            </dl>
+            <p className="mt-3 text-xs leading-5 text-slate-500">{copy.normalRanges.footnote}</p>
+          </div>
+
           {/* Provider details */}
           <div className="animate-fade-in-up delay-400 rounded-[32px] border border-white/[0.08] bg-gradient-to-b from-slate-900/70 to-slate-950/80 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
                 <Sparkles className="h-4 w-4 text-cyan-300" />
               </div>
-              <p className="font-medium text-white">Provider details</p>
+              <p className="font-medium text-white">{copy.providerTitle}</p>
             </div>
             <p className="mt-4 text-sm leading-6 text-slate-400">
-              <span className="font-medium text-slate-200">Provider:</span> {result.provider}
+              <span className="font-medium text-slate-200">{copy.providerLabel}</span> {result.provider}
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-500">{result.disclaimer}</p>
           </div>

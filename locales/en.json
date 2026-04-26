@@ -1,0 +1,293 @@
+{
+  "layout": {
+    "title": "DiaVision | Diabetes Risk Predictor",
+    "description": "A polished, Vercel-ready diabetes risk predictor with a secure server-side prediction adapter and patient-friendly results."
+  },
+  "page": {
+    "badge": "Secure & private health screening",
+    "heading": "DiaVision - Diabetes risk predictor",
+    "intro": "This tool helps you understand your potential risk for developing diabetes. By answering a few simple questions about your health, you'll receive personalized insights to help you make informed lifestyle choices."
+  },
+  "highlights": {
+    "simple": {
+      "title": "Simple Step-by-Step Flow",
+      "copy": "Our easy-to-use questionnaire guides you through entering your basic health details and recent lab results."
+    },
+    "personalized": {
+      "title": "Personalized Insights",
+      "copy": "Get a clear, visual summary of your potential diabetes risk factors and helpful recommendations based on your unique profile."
+    },
+    "private": {
+      "title": "Secure & Private",
+      "copy": "Your health data is processed securely and is never shared. Your privacy is our top priority."
+    },
+    "comprehensive": {
+      "title": "Comprehensive View",
+      "copy": "The assessment looks at how your different health factors work together to give you a complete picture of your wellness."
+    }
+  },
+  "disclaimer": {
+    "title": "Important",
+    "body": "Important Notice: This tool is designed to help you understand your health and is for educational purposes only. It does not provide a formal medical diagnosis and should never replace professional advice, testing, or treatment from your doctor."
+  },
+  "validation": {
+    "pregnancies": {
+      "required": "Please enter your pregnancy count (or 0 if not applicable).",
+      "min": "Pregnancies cannot be negative.",
+      "max": "Pregnancy count must be 20 or below."
+    },
+    "glucose": {
+      "required": "Please enter your glucose value.",
+      "min": "Glucose must be greater than 0.",
+      "max": "Glucose looks too high."
+    },
+    "bloodPressure": {
+      "required": "Please enter your blood pressure value.",
+      "min": "Blood pressure must be greater than 0.",
+      "max": "Blood pressure looks too high."
+    },
+    "skinThickness": {
+      "required": "Please enter a value or 0 if unknown.",
+      "min": "Skin thickness cannot be negative.",
+      "max": "Skin thickness looks too high."
+    },
+    "insulin": {
+      "required": "Please enter a value or 0 if unknown.",
+      "min": "Insulin cannot be negative.",
+      "max": "Insulin looks too high."
+    },
+    "diabetesPedigreeFunction": {
+      "required": "Please enter a family history score (or 0 if unknown).",
+      "min": "Diabetes pedigree function cannot be negative.",
+      "max": "Diabetes pedigree function looks too high."
+    },
+    "age": {
+      "required": "Please enter your age.",
+      "min": "Age must be at least 18.",
+      "max": "Age looks too high."
+    },
+    "bmi": {
+      "required": "Please enter your BMI.",
+      "min": "BMI must be greater than 0.",
+      "max": "BMI must be 80 or below."
+    }
+  },
+  "api": {
+    "reviewFields": "Please review the highlighted answers and try again.",
+    "invalidJson": "Request body must be valid JSON.",
+    "timeout": "The prediction service took too long to respond.",
+    "unavailable": "The prediction service is currently unavailable.",
+    "generic": "We could not complete the assessment right now. Please try again shortly.",
+    "export": {
+      "noDb": "Database is not configured (MONGODB_URI is missing).",
+      "noToken": "CSV export is disabled until RISK_CSV_EXPORT_TOKEN is set in the environment.",
+      "unauthorized": "Invalid or missing export token. Use ?token=… or X-Export-Token / Authorization: Bearer."
+    }
+  },
+  "form": {
+    "missingValue": "—",
+    "flowEyebrow": "Step-by-step flow",
+    "pageOf": "Page {current} of {total}: {label}",
+    "wizard": {
+      "welcome": {
+        "label": "Welcome",
+        "shortLabel": "Start",
+        "eyebrow": "Step 1",
+        "title": "Welcome to Your Health Assessment",
+        "description": "This quick questionnaire will help you understand your diabetes risk. It takes just a few minutes to complete.",
+        "cards": {
+          "quick": { "title": "Quick & Easy", "copy": "Answer a few straightforward questions about your health history and recent lab tests." },
+          "smart": { "title": "Smart Analysis", "copy": "We'll securely analyze your numbers to give you a personalized overview of your risk profile." },
+          "holistic": { "title": "Holistic View", "copy": "See how different factors like weight, age, and blood sugar work together to impact your health." }
+        },
+        "tipsTitle": "Tips for success",
+        "tips": [
+          "Have your most recent lab results handy for the best accuracy (like your blood sugar and blood pressure).",
+          "If you have never been pregnant or it doesn't apply to you, simply enter 0 for the pregnancy count.",
+          "Don't worry if you don't know your exact insulin or skin thickness levels. Just enter 0, and we'll use a standard average.",
+          "We'll ask about your family history to better understand your genetic background related to diabetes."
+        ],
+        "tipsFooter": "Remember, this tool is here to educate and inform. It is not a replacement for a doctor's visit or a formal medical diagnosis."
+      },
+      "profile": {
+        "label": "About You",
+        "shortLabel": "Profile",
+        "eyebrow": "Step 2",
+        "title": "Let's start with the basics",
+        "description": "Tell us a bit about yourself. Your age and body metrics give us a helpful starting point.",
+        "ageDescription": "Please enter your current age in years.",
+        "pregnanciesDescription": "Enter 0 if this doesn't apply to you or if you've never been pregnant.",
+        "bmiDescription": "Your Body Mass Index (BMI) helps us understand your overall physical profile.",
+        "sidebarTitle": "Why we ask for this",
+        "sidebarBody": "Age, weight, and health history are some of the most important baseline factors when assessing diabetes risk."
+      },
+      "labs": {
+        "label": "Health Numbers",
+        "shortLabel": "Labs",
+        "eyebrow": "Step 3",
+        "title": "Your recent lab results",
+        "description": "Enter your latest blood sugar and blood pressure readings. These are great indicators of your current wellness.",
+        "glucoseDescription": "Use a recent fasting test result if you have one.",
+        "bloodPressureDescription": "Enter your top (systolic) blood pressure number."
+      },
+      "measurements": {
+        "label": "More Details",
+        "shortLabel": "More",
+        "eyebrow": "Step 4",
+        "title": "Additional health details",
+        "description": "A few more details help make your results as accurate as possible. Don't worry if you don't know every single one.",
+        "skinDescription": "Enter 0 if you don't know this number. We'll use a standard average.",
+        "insulinDescription": "Enter 0 if you don't know this number. We'll use a standard average.",
+        "dpfDescription": "A score representing your family history of diabetes. Usually falls between 0.1 and 1.5.",
+        "asideMissing": { "title": "Missing info? No problem", "copy": "If you aren't sure about some of these specific details, just enter 0. The system will fill in the gaps with safe, standard averages." },
+        "asideConnecting": { "title": "Connecting the dots", "copy": "By looking at all these numbers together, we can give you a much better picture of your health than looking at just one number alone." }
+      },
+      "review": {
+        "label": "Review",
+        "shortLabel": "Review",
+        "eyebrow": "Step 5",
+        "title": "Review your answers",
+        "description": "Take a moment to check the details you've entered before we generate your personalized health insights.",
+        "sectionAbout": "About You",
+        "sectionHealth": "Health Numbers",
+        "sectionMore": "More Details",
+        "summaryAge": "Age",
+        "summaryPregnancies": "Pregnancies",
+        "summaryBmi": "BMI",
+        "summaryGlucose": "Glucose",
+        "summaryBloodPressure": "Blood pressure",
+        "summarySkin": "Skin thickness",
+        "summaryInsulin": "Insulin",
+        "summaryDpf": "Family History Score",
+        "ageUnit": "years",
+        "glucoseUnit": "mg/dL",
+        "bpUnit": "mmHg",
+        "skinUnit": "mm",
+        "whatNext": "What happens next",
+        "nextSteps": [
+          "We'll do a quick check to make sure your answers are ready to go.",
+          "Our system will securely review your health factors together.",
+          "You'll get a clear, easy-to-read summary of your potential diabetes risk on the next screen."
+        ],
+        "reviewFooter": "Important: These results are to help you understand your health better. Please share any concerns or questions you have with your healthcare provider."
+      },
+      "result": {
+        "label": "Your Results",
+        "shortLabel": "Result",
+        "eyebrow": "Step 6",
+        "title": "Your Health Overview",
+        "description": "Here is a summary of your diabetes risk assessment based on the information you provided."
+      }
+    },
+    "fields": {
+      "age": { "label": "Age" },
+      "pregnancies": { "label": "Pregnancy count" },
+      "bmi": { "label": "BMI" },
+      "glucose": { "label": "Glucose (mg/dL)" },
+      "bloodPressure": { "label": "Blood pressure (mmHg)" },
+      "skinThickness": { "label": "Skin thickness (mm)" },
+      "insulin": { "label": "Insulin" },
+      "diabetesPedigreeFunction": { "label": "Family History Score" }
+    },
+    "placeholders": {
+      "age": "e.g. 45",
+      "pregnancies": "e.g. 0",
+      "bmi": "e.g. 25.0",
+      "glucose": "e.g. 100",
+      "bloodPressure": "e.g. 72",
+      "skinThickness": "e.g. 20",
+      "insulin": "e.g. 80",
+      "diabetesPedigreeFunction": "e.g. 0.5"
+    },
+    "actions": {
+      "back": "Back",
+      "continue": "Continue",
+      "startAssessment": "Start assessment",
+      "reviewInputs": "Review inputs",
+      "getResults": "Get My Results",
+      "loadingResults": "Loading results",
+      "editAnswers": "Edit answers",
+      "startOver": "Start over",
+      "resultFooterTitle": "Need to update an answer?",
+      "resultFooterBody": "Go back to the review step to fix a typo, or start over from the beginning.",
+      "footerTitleReview": "Whenever you're ready, let's get your personalized health insights.",
+      "footerTitleProgress": "Move through the steps in order to complete your assessment."
+    },
+    "errors": {
+      "serverGeneric": "We couldn't complete the assessment right now. Please try again.",
+      "connection": "There was a connection issue. Please check your internet and try again."
+    }
+  },
+  "result": {
+    "placeholder": {
+      "title": "Your risk snapshot will appear here.",
+      "body": "Fill out the assessment to see a probability estimate, the biggest contributors, and follow-up suggestions you can take into a clinical conversation.",
+      "bullets": [
+        "Server-side prediction requests",
+        "Clear risk categories and next steps",
+        "Embedded model when no external API is set",
+        "When configured, your latest completed assessment is stored in the app database for continuity"
+      ]
+    },
+    "loading": {},
+    "error": {
+      "title": "We could not complete the assessment"
+    },
+    "finalEyebrow": "Final result",
+    "subtitles": {
+      "low": "Lower current risk profile",
+      "moderate": "Moderate current risk profile",
+      "high": "Higher current risk profile"
+    },
+    "riskLevelNames": {
+      "low": "Low",
+      "moderate": "Moderate",
+      "high": "High"
+    },
+    "header": "Predicted probability, risk tier, and the strongest drivers from the model.",
+    "probability": "Probability",
+    "confidence": "Confidence",
+    "score": "Score",
+    "outOf": "/ {max}",
+    "clinicalTitle": "Clinical-style summary",
+    "recommendationsTitle": "Recommended next steps",
+    "contributorsTitle": "Biggest contributors",
+    "providerTitle": "Provider details",
+    "providerLabel": "Provider:",
+    "impact": {
+      "strong": { "label": "Strong" },
+      "elevated": { "label": "Elevated" },
+      "watch": { "label": "Watch" }
+    },
+    "gauge": {
+      "low": "Low",
+      "middle": "Middle",
+      "high": "High",
+      "riskPill": "RISK"
+    },
+    "normalRanges": {
+      "title": "Typical normal ranges",
+      "footnote": "General reference values for context; your clinician may use different targets for you.",
+      "bmi": {
+        "label": "BMI",
+        "value": "18.5 - 24.9"
+      },
+      "glucose": {
+        "label": "Glucose",
+        "value": "70 - 99 mg/dL (fasting)"
+      },
+      "bloodPressure": {
+        "label": "Blood pressure",
+        "value": "90 - 120 mmHg (systolic)"
+      },
+      "skinThickness": {
+        "label": "Skin thickness",
+        "value": "10 - 30 mm"
+      },
+      "insulin": {
+        "label": "Insulin",
+        "value": "2.6 - 24.9 µIU/mL (fasting)"
+      }
+    }
+  }
+}

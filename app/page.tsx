@@ -2,26 +2,27 @@ import { Activity, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
 
 import { DisclaimerCard } from "@/components/disclaimer-card";
 import { RiskAssessmentForm } from "@/components/risk-assessment-form";
+import en from "@/locales/en.json";
 
 const highlights = [
   {
-    title: "Simple Step-by-Step Flow",
-    copy: "Our easy-to-use questionnaire guides you through entering your basic health details and recent lab results.",
+    title: en.highlights.simple.title,
+    copy: en.highlights.simple.copy,
     icon: Activity,
   },
   {
-    title: "Personalized Insights",
-    copy: "Get a clear, visual summary of your potential diabetes risk factors and helpful recommendations based on your unique profile.",
+    title: en.highlights.personalized.title,
+    copy: en.highlights.personalized.copy,
     icon: Stethoscope,
   },
   {
-    title: "Secure & Private",
-    copy: "Your health data is processed securely and is never shared. Your privacy is our top priority.",
+    title: en.highlights.private.title,
+    copy: en.highlights.private.copy,
     icon: ShieldCheck,
   },
   {
-    title: "Comprehensive View",
-    copy: "The assessment looks at how your different health factors work together to give you a complete picture of your wellness.",
+    title: en.highlights.comprehensive.title,
+    copy: en.highlights.comprehensive.copy,
     icon: Sparkles,
   },
 ];
@@ -34,13 +35,13 @@ export default function HomePage() {
       <section className="relative mx-auto max-w-7xl px-6 pb-12 pt-10 sm:px-8 lg:px-10 lg:pb-16 lg:pt-16">
         <div className="max-w-3xl">
           <div className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-1.5 text-sm text-cyan-100">
-            Secure & private health screening
+            {en.page.badge}
           </div>
           <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            DiaVision - Diabetes risk predictor
+            {en.page.heading}
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-            This tool helps you understand your potential risk for developing diabetes. By answering a few simple questions about your health, you'll receive personalized insights to help you make informed lifestyle choices.
+            {en.page.intro}
           </p>
         </div>
 
@@ -59,7 +60,7 @@ export default function HomePage() {
 
       <section className="relative mx-auto max-w-7xl px-6 pb-16 sm:px-8 lg:px-10 lg:pb-24">
         <div className="mb-6">
-          <DisclaimerCard body="Important Notice: This tool is designed to help you understand your health and is for educational purposes only. It does not provide a formal medical diagnosis and should never replace professional advice, testing, or treatment from your doctor." />
+          <DisclaimerCard body={en.disclaimer.body} title={en.disclaimer.title} />
         </div>
 
         <RiskAssessmentForm />
