@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Activity,
@@ -23,6 +23,8 @@ import en from "@/locales/en.json";
 import type { PredictionResult } from "@/types/prediction";
 
 type StepField = keyof RiskFormValues;
+
+type MetricWizardStep = "profile" | "labs" | "measurements";
 
 type WizardStep = {
   id: "welcome" | "profile" | "labs" | "measurements" | "review" | "result";
@@ -168,6 +170,15 @@ function StepCard({
   );
 }
 
+/**
+ * Browsers group autofill by `section-*`; a different section per wizard step keeps
+ * the next step’s first input from reusing the previous step’s “slot” (e.g. age → glucose).
+ * Second token `off` is a valid end state per the HTML autofill model.
+ */
+function metricAutocompleteValue(wizardStep: MetricWizardStep, field: StepField): string {
+  return `section-dm-w-${wizardStep}__${String(field).replaceAll(/[^a-z0-9]/gi, "-")} off`;
+}
+
 function MetricField({
   description,
   error,
@@ -179,6 +190,7 @@ function MetricField({
   placeholder,
   register,
   step,
+  wizardStep,
 }: {
   description?: string;
   error?: string;
@@ -190,8 +202,10 @@ function MetricField({
   placeholder: string;
   register: UseFormRegister<RiskFormValues>;
   step?: number;
+  wizardStep: MetricWizardStep;
 }) {
-  const inputId = `assessment-metric-${id}`;
+  const [autofillUnlocked, setAutofillUnlocked] = useState(false);
+  const inputId = `assessment-metric-${wizardStep}-${id}`;
 
   return (
     <div>
@@ -201,7 +215,7 @@ function MetricField({
       <input
         aria-invalid={Boolean(error)}
         autoCapitalize="none"
-        autoComplete="off"
+        autoComplete={metricAutocompleteValue(wizardStep, id)}
         autoCorrect="off"
         className={inputClassName}
         data-1p-ignore
@@ -210,9 +224,26 @@ function MetricField({
         id={inputId}
         inputMode={inputMode}
         placeholder={placeholder}
+        readOnly={!autofillUnlocked}
         spellCheck={false}
         step={step}
         type="number"
+        onInput={(e: FormEvent<HTMLInputElement>) => {
+          if (autofillUnlocked) {
+            return;
+          }
+          const el = e.currentTarget;
+          if (el.value === "") {
+            return;
+          }
+          setAutofillUnlocked(true);
+        }}
+        onPointerDownCapture={() => {
+          setAutofillUnlocked(true);
+        }}
+        onFocus={() => {
+          setAutofillUnlocked(true);
+        }}
         {...register(id, { valueAsNumber: true })}
       />
       {normalRange && normalRangePrefix ? (
@@ -489,6 +520,7 @@ export function RiskAssessmentForm() {
               label={f.age.label}
               placeholder={ph.age}
               register={register}
+              wizardStep="profile"
             />
             <MetricField
               description={p.pregnanciesDescription}
@@ -498,6 +530,7 @@ export function RiskAssessmentForm() {
               label={f.pregnancies.label}
               placeholder={ph.pregnancies}
               register={register}
+              wizardStep="profile"
             />
             <MetricField
               description={p.bmiDescription}
@@ -509,6 +542,7 @@ export function RiskAssessmentForm() {
               placeholder={ph.bmi}
               register={register}
               step={0.1}
+              wizardStep="profile"
             />
             <div className="rounded-[28px] border border-white/10 bg-slate-950/45 p-5 shadow-[0_16px_40px_rgba(2,6,23,0.24)]">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-200">
@@ -544,6 +578,7 @@ export function RiskAssessmentForm() {
               normalRangePrefix={nr.prefix}
               placeholder={ph.glucose}
               register={register}
+              wizardStep="labs"
             />
             <MetricField
               description={l.bloodPressureDescription}
@@ -554,6 +589,7 @@ export function RiskAssessmentForm() {
               normalRangePrefix={nr.prefix}
               placeholder={ph.bloodPressure}
               register={register}
+              wizardStep="labs"
             />
           </div>
         </StepCard>
@@ -581,6 +617,7 @@ export function RiskAssessmentForm() {
                 normalRangePrefix={nr.prefix}
                 placeholder={ph.skinThickness}
                 register={register}
+                wizardStep="measurements"
               />
               <MetricField
                 description={m.insulinDescription}
@@ -591,6 +628,7 @@ export function RiskAssessmentForm() {
                 normalRangePrefix={nr.prefix}
                 placeholder={ph.insulin}
                 register={register}
+                wizardStep="measurements"
               />
               <div className="md:col-span-2">
                 <MetricField
@@ -601,6 +639,7 @@ export function RiskAssessmentForm() {
                   placeholder={ph.diabetesPedigreeFunction}
                   register={register}
                   step={0.01}
+                  wizardStep="measurements"
                 />
               </div>
             </div>
