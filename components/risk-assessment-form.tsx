@@ -36,6 +36,7 @@ type WizardStep = {
 
 const t = en.form;
 const w = t.wizard;
+const nr = t.normalRanges;
 
 const EMPTY_FORM_DEFAULTS: DefaultValues<RiskFormValues> = {
   pregnancies: undefined,
@@ -173,6 +174,8 @@ function MetricField({
   id,
   inputMode = "decimal",
   label,
+  normalRange,
+  normalRangePrefix,
   placeholder,
   register,
   step,
@@ -182,6 +185,8 @@ function MetricField({
   id: StepField;
   inputMode?: "decimal" | "numeric";
   label: string;
+  normalRange?: string;
+  normalRangePrefix?: string;
   placeholder: string;
   register: UseFormRegister<RiskFormValues>;
   step?: number;
@@ -201,6 +206,11 @@ function MetricField({
         type="number"
         {...register(id, { valueAsNumber: true })}
       />
+      {normalRange && normalRangePrefix ? (
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          <span className="font-medium text-slate-400">{normalRangePrefix}:</span> {normalRange}
+        </p>
+      ) : null}
       {description ? <p className="mt-2 text-xs leading-5 text-slate-400">{description}</p> : null}
       <FieldError message={error} />
     </div>
@@ -485,6 +495,8 @@ export function RiskAssessmentForm() {
               error={errors.bmi?.message}
               id="bmi"
               label={f.bmi.label}
+              normalRange={nr.bmi}
+              normalRangePrefix={nr.prefix}
               placeholder={ph.bmi}
               register={register}
               step={0.1}
@@ -519,6 +531,8 @@ export function RiskAssessmentForm() {
               error={errors.glucose?.message}
               id="glucose"
               label={f.glucose.label}
+              normalRange={nr.glucose}
+              normalRangePrefix={nr.prefix}
               placeholder={ph.glucose}
               register={register}
             />
@@ -527,6 +541,8 @@ export function RiskAssessmentForm() {
               error={errors.bloodPressure?.message}
               id="bloodPressure"
               label={f.bloodPressure.label}
+              normalRange={nr.bloodPressure}
+              normalRangePrefix={nr.prefix}
               placeholder={ph.bloodPressure}
               register={register}
             />
@@ -552,6 +568,8 @@ export function RiskAssessmentForm() {
                 error={errors.skinThickness?.message}
                 id="skinThickness"
                 label={f.skinThickness.label}
+                normalRange={nr.skinThickness}
+                normalRangePrefix={nr.prefix}
                 placeholder={ph.skinThickness}
                 register={register}
               />
@@ -560,6 +578,8 @@ export function RiskAssessmentForm() {
                 error={errors.insulin?.message}
                 id="insulin"
                 label={f.insulin.label}
+                normalRange={nr.insulin}
+                normalRangePrefix={nr.prefix}
                 placeholder={ph.insulin}
                 register={register}
               />

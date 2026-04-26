@@ -216,6 +216,14 @@
     "errors": {
       "serverGeneric": "We couldn't complete the assessment right now. Please try again.",
       "connection": "There was a connection issue. Please check your internet and try again."
+    },
+    "normalRanges": {
+      "prefix": "Typical adult reference",
+      "bmi": "18.5 - 24.9",
+      "glucose": "70 - 99 mg/dL (fasting)",
+      "bloodPressure": "90 - 120 mmHg (systolic)",
+      "skinThickness": "10 - 30 mm",
+      "insulin": "2.6 - 24.9 µIU/mL (fasting)"
     }
   },
   "result": {
@@ -264,30 +272,6 @@
       "middle": "Middle",
       "high": "High",
       "riskPill": "RISK"
-    },
-    "normalRanges": {
-      "title": "Typical normal ranges",
-      "footnote": "General reference values for context; your clinician may use different targets for you.",
-      "bmi": {
-        "label": "BMI",
-        "value": "18.5 - 24.9"
-      },
-      "glucose": {
-        "label": "Glucose",
-        "value": "70 - 99 mg/dL (fasting)"
-      },
-      "bloodPressure": {
-        "label": "Blood pressure",
-        "value": "90 - 120 mmHg (systolic)"
-      },
-      "skinThickness": {
-        "label": "Skin thickness",
-        "value": "10 - 30 mm"
-      },
-      "insulin": {
-        "label": "Insulin",
-        "value": "2.6 - 24.9 µIU/mL (fasting)"
-      }
     }
   }
 }

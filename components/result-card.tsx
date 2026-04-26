@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, CheckCircle2, ClipboardList, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
+import { Activity, ArrowRight, CheckCircle2, ShieldCheck, Sparkles, Stethoscope } from "lucide-react";
 
 import { RiskGauge } from "@/components/risk-gauge";
 import { cn, formatPercent } from "@/lib/utils";
@@ -283,39 +283,6 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
                 );
               })}
             </div>
-          </div>
-
-          {/* Reference ranges */}
-          <div className="animate-fade-in-up delay-300 rounded-[32px] border border-white/[0.08] bg-gradient-to-b from-slate-900/70 to-slate-950/80 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-cyan-300/10">
-                <ClipboardList className="h-4 w-4 text-cyan-300" />
-              </div>
-              <p className="font-medium text-white">{copy.normalRanges.title}</p>
-            </div>
-            <dl className="mt-4 space-y-3">
-              {(
-                [
-                  "bmi",
-                  "glucose",
-                  "bloodPressure",
-                  "skinThickness",
-                  "insulin",
-                ] as const
-              ).map((key) => {
-                const row = copy.normalRanges[key];
-                return (
-                  <div
-                    key={key}
-                    className="flex flex-wrap items-baseline justify-between gap-2 rounded-2xl border border-white/[0.07] bg-slate-950/50 px-4 py-3"
-                  >
-                    <dt className="text-sm font-medium text-slate-200">{row.label}</dt>
-                    <dd className="text-right text-sm leading-6 text-slate-400">{row.value}</dd>
-                  </div>
-                );
-              })}
-            </dl>
-            <p className="mt-3 text-xs leading-5 text-slate-500">{copy.normalRanges.footnote}</p>
           </div>
 
           {/* Provider details */}
