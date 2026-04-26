@@ -270,7 +270,7 @@
     },
     "gauge": {
       "low": "Low",
-      "middle": "Mod",
+      "middle": "Medium",
       "high": "High",
       "riskPill": "RISK TIER"
     }
