@@ -32,17 +32,17 @@ type WizardStep = {
   fields?: readonly StepField[];
 };
 
-// Դարձրել ենք դատարկ, որպեսզի ինփութները լինեն մաքուր
-const DEFAULT_VALUES = {
-  pregnancies: "",
-  glucose: "",
-  bloodPressure: "",
-  skinThickness: "",
-  insulin: "",
-  bmi: "",
-  diabetesPedigreeFunction: "",
-  age: "",
-} as unknown as RiskFormValues;
+// Օգտագործում ենք undefined, որպեսզի դաշտերը մաքուր լինեն, բայց համակարգը չկոտրվի
+const DEFAULT_VALUES: Partial<RiskFormValues> = {
+  pregnancies: undefined,
+  glucose: undefined,
+  bloodPressure: undefined,
+  skinThickness: undefined,
+  insulin: undefined,
+  bmi: undefined,
+  diabetesPedigreeFunction: undefined,
+  age: undefined,
+};
 
 const wizardSteps: readonly WizardStep[] = [
   {
@@ -185,7 +185,7 @@ function MetricField({
   id: StepField;
   inputMode?: "decimal" | "numeric";
   label: string;
-  normalRange?: string; 
+  normalRange?: string;
   placeholder: string;
   register: UseFormRegister<RiskFormValues>;
   step?: number;
@@ -216,10 +216,13 @@ function MetricField({
   );
 }
 
-// Ավելացված է ստուգում, որպեսզի դատարկ (NaN) արժեքների դեպքում ծրագիրը չքրաշվի
-function formatReviewValue(field: StepField, value: number) {
+// Բարելավված ֆունկցիա, որն ապահովագրում է NaN-ից և undefined-ից
+function formatReviewValue(field: StepField, value: number | undefined) {
+  if (value === undefined || value === null || Number.isNaN(Number(value))) {
+    return "-";
+  }
+
   const numValue = Number(value);
-  if (Number.isNaN(numValue)) return "-";
 
   if (field === "bmi") {
     return numValue.toFixed(1);
@@ -248,7 +251,7 @@ export function RiskAssessmentForm() {
     trigger,
   } = useForm<RiskFormValues>({
     resolver: zodResolver(riskAssessmentSchema),
-    defaultValues: DEFAULT_VALUES,
+    defaultValues: DEFAULT_VALUES as RiskFormValues,
   });
 
   const isReviewStep = currentStep === reviewStepIndex;
@@ -281,7 +284,9 @@ export function RiskAssessmentForm() {
       items: [
         {
           label: "Skin thickness",
-          value: values.skinThickness !== undefined && !Number.isNaN(Number(values.skinThickness)) ? `${formatReviewValue("skinThickness", values.skinThickness)} mm` : "-",
+          value: values.skinThickness !== undefined && !Number.isNaN(Number(values.skinThickness)) 
+            ? `${formatReviewValue("skinThickness", values.skinThickness)} mm` 
+            : "-",
         },
         { label: "Insulin", value: formatReviewValue("insulin", values.insulin) },
         {
@@ -319,7 +324,7 @@ export function RiskAssessmentForm() {
   };
 
   const handleStartOver = () => {
-    reset(DEFAULT_VALUES);
+    reset(DEFAULT_VALUES as RiskFormValues);
     clearErrors();
     setResult(null);
     setServerError(null);
