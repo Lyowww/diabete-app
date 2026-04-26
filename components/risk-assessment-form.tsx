@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, type ReactNode } from "react";
@@ -32,17 +33,16 @@ type WizardStep = {
   fields?: readonly StepField[];
 };
 
-// Դաշտերն ի սկզբանե դատարկ են
-const DEFAULT_VALUES = {
-  pregnancies: "",
-  glucose: "",
-  bloodPressure: "",
-  skinThickness: "",
-  insulin: "",
-  bmi: "",
-  diabetesPedigreeFunction: "",
-  age: "",
-} as unknown as RiskFormValues;
+const DEFAULT_VALUES: RiskFormValues = {
+  pregnancies: 2,
+  glucose: 117,
+  bloodPressure: 72,
+  skinThickness: 29,
+  insulin: 125,
+  bmi: 32.3,
+  diabetesPedigreeFunction: 0.47,
+  age: 33,
+};
 
 const wizardSteps: readonly WizardStep[] = [
   {
@@ -175,7 +175,6 @@ function MetricField({
   id,
   inputMode = "decimal",
   label,
-  normalRange,
   placeholder,
   register,
   step,
@@ -185,7 +184,6 @@ function MetricField({
   id: StepField;
   inputMode?: "decimal" | "numeric";
   label: string;
-  normalRange?: string; 
   placeholder: string;
   register: UseFormRegister<RiskFormValues>;
   step?: number;
@@ -206,29 +204,21 @@ function MetricField({
         {...register(id, { valueAsNumber: true })}
       />
       {description ? <p className="mt-2 text-xs leading-5 text-slate-400">{description}</p> : null}
-      {normalRange ? (
-        <p className="mt-1 text-[11px] font-medium tracking-wide text-emerald-300/90">
-          Normal range: {normalRange}
-        </p>
-      ) : null}
       <FieldError message={error} />
     </div>
   );
 }
 
-function formatReviewValue(field: StepField, value: any) {
-  // Անվտանգ փոխարկում, որպեսզի դատարկ վիճակում ծրագիրը չքրաշվի (toFixed-ը միշտ կաշխատի)
-  const safeValue = Number(value) || 0;
-
+function formatReviewValue(field: StepField, value: number) {
   if (field === "bmi") {
-    return safeValue.toFixed(1);
+    return value.toFixed(1);
   }
 
   if (field === "diabetesPedigreeFunction") {
-    return safeValue.toFixed(2);
+    return value.toFixed(2);
   }
 
-  return safeValue.toFixed(0);
+  return value.toFixed(0);
 }
 
 export function RiskAssessmentForm() {
@@ -461,7 +451,7 @@ export function RiskAssessmentForm() {
               id="age"
               inputMode="numeric"
               label="Age"
-              placeholder="e.g. 33"
+              placeholder="33"
               register={register}
             />
             <MetricField
@@ -470,7 +460,7 @@ export function RiskAssessmentForm() {
               id="pregnancies"
               inputMode="numeric"
               label="Pregnancy count"
-              placeholder="e.g. 2"
+              placeholder="2"
               register={register}
             />
             <MetricField
@@ -478,8 +468,7 @@ export function RiskAssessmentForm() {
               error={errors.bmi?.message}
               id="bmi"
               label="BMI"
-              normalRange="18.5 - 24.9"
-              placeholder="e.g. 32.3"
+              placeholder="32.3"
               register={register}
               step={0.1}
             />
@@ -510,8 +499,7 @@ export function RiskAssessmentForm() {
               error={errors.glucose?.message}
               id="glucose"
               label="Glucose (mg/dL)"
-              normalRange="70 - 99 mg/dL (fasting)"
-              placeholder="e.g. 117"
+              placeholder="117"
               register={register}
             />
             <MetricField
@@ -519,8 +507,7 @@ export function RiskAssessmentForm() {
               error={errors.bloodPressure?.message}
               id="bloodPressure"
               label="Blood pressure (mmHg)"
-              normalRange="90 - 120 mmHg (systolic)"
-              placeholder="e.g. 72"
+              placeholder="72"
               register={register}
             />
           </div>
@@ -542,8 +529,7 @@ export function RiskAssessmentForm() {
                 error={errors.skinThickness?.message}
                 id="skinThickness"
                 label="Skin thickness (mm)"
-                normalRange="10 - 30 mm"
-                placeholder="e.g. 29"
+                placeholder="29"
                 register={register}
               />
               <MetricField
@@ -551,8 +537,7 @@ export function RiskAssessmentForm() {
                 error={errors.insulin?.message}
                 id="insulin"
                 label="Insulin"
-                normalRange="2.6 - 24.9 µIU/mL (fasting)"
-                placeholder="e.g. 125"
+                placeholder="125"
                 register={register}
               />
               <div className="md:col-span-2">
@@ -561,7 +546,7 @@ export function RiskAssessmentForm() {
                   error={errors.diabetesPedigreeFunction?.message}
                   id="diabetesPedigreeFunction"
                   label="Family History Score"
-                  placeholder="e.g. 0.47"
+                  placeholder="0.47"
                   register={register}
                   step={0.01}
                 />
