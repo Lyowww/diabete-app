@@ -32,17 +32,17 @@ type WizardStep = {
   fields?: readonly StepField[];
 };
 
-// Օգտագործում ենք undefined, որպեսզի դաշտերը մաքուր լինեն, բայց համակարգը չկոտրվի
-const DEFAULT_VALUES: Partial<RiskFormValues> = {
-  pregnancies: undefined,
-  glucose: undefined,
-  bloodPressure: undefined,
-  skinThickness: undefined,
-  insulin: undefined,
-  bmi: undefined,
-  diabetesPedigreeFunction: undefined,
-  age: undefined,
-};
+// Դաշտերն ի սկզբանե դատարկ են
+const DEFAULT_VALUES = {
+  pregnancies: "",
+  glucose: "",
+  bloodPressure: "",
+  skinThickness: "",
+  insulin: "",
+  bmi: "",
+  diabetesPedigreeFunction: "",
+  age: "",
+} as unknown as RiskFormValues;
 
 const wizardSteps: readonly WizardStep[] = [
   {
@@ -185,7 +185,7 @@ function MetricField({
   id: StepField;
   inputMode?: "decimal" | "numeric";
   label: string;
-  normalRange?: string;
+  normalRange?: string; 
   placeholder: string;
   register: UseFormRegister<RiskFormValues>;
   step?: number;
@@ -216,23 +216,19 @@ function MetricField({
   );
 }
 
-// Բարելավված ֆունկցիա, որն ապահովագրում է NaN-ից և undefined-ից
-function formatReviewValue(field: StepField, value: number | undefined) {
-  if (value === undefined || value === null || Number.isNaN(Number(value))) {
-    return "-";
-  }
-
-  const numValue = Number(value);
+function formatReviewValue(field: StepField, value: any) {
+  // Անվտանգ փոխարկում, որպեսզի դատարկ վիճակում ծրագիրը չքրաշվի (toFixed-ը միշտ կաշխատի)
+  const safeValue = Number(value) || 0;
 
   if (field === "bmi") {
-    return numValue.toFixed(1);
+    return safeValue.toFixed(1);
   }
 
   if (field === "diabetesPedigreeFunction") {
-    return numValue.toFixed(2);
+    return safeValue.toFixed(2);
   }
 
-  return numValue.toFixed(0);
+  return safeValue.toFixed(0);
 }
 
 export function RiskAssessmentForm() {
@@ -251,7 +247,7 @@ export function RiskAssessmentForm() {
     trigger,
   } = useForm<RiskFormValues>({
     resolver: zodResolver(riskAssessmentSchema),
-    defaultValues: DEFAULT_VALUES as RiskFormValues,
+    defaultValues: DEFAULT_VALUES,
   });
 
   const isReviewStep = currentStep === reviewStepIndex;
@@ -264,7 +260,7 @@ export function RiskAssessmentForm() {
     {
       title: "About You",
       items: [
-        { label: "Age", value: values.age ? `${values.age} years` : "-" },
+        { label: "Age", value: `${values.age} years` },
         { label: "Pregnancies", value: formatReviewValue("pregnancies", values.pregnancies) },
         { label: "BMI", value: formatReviewValue("bmi", values.bmi) },
       ],
@@ -272,10 +268,10 @@ export function RiskAssessmentForm() {
     {
       title: "Health Numbers",
       items: [
-        { label: "Glucose", value: values.glucose ? `${formatReviewValue("glucose", values.glucose)} mg/dL` : "-" },
+        { label: "Glucose", value: `${formatReviewValue("glucose", values.glucose)} mg/dL` },
         {
           label: "Blood pressure",
-          value: values.bloodPressure ? `${formatReviewValue("bloodPressure", values.bloodPressure)} mmHg` : "-",
+          value: `${formatReviewValue("bloodPressure", values.bloodPressure)} mmHg`,
         },
       ],
     },
@@ -284,9 +280,7 @@ export function RiskAssessmentForm() {
       items: [
         {
           label: "Skin thickness",
-          value: values.skinThickness !== undefined && !Number.isNaN(Number(values.skinThickness)) 
-            ? `${formatReviewValue("skinThickness", values.skinThickness)} mm` 
-            : "-",
+          value: `${formatReviewValue("skinThickness", values.skinThickness)} mm`,
         },
         { label: "Insulin", value: formatReviewValue("insulin", values.insulin) },
         {
@@ -324,7 +318,7 @@ export function RiskAssessmentForm() {
   };
 
   const handleStartOver = () => {
-    reset(DEFAULT_VALUES as RiskFormValues);
+    reset(DEFAULT_VALUES);
     clearErrors();
     setResult(null);
     setServerError(null);
