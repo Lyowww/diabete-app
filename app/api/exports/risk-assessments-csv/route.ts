@@ -43,6 +43,26 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("[risk-assessments-csv] export failed", error);
+    if (isLikelyMongoConnectionFailure(error)) {
+      return jsonError(messages.connectionFailed, 502);
+    }
     return jsonError(en.api.generic, 500);
   }
+}
+
+function isLikelyMongoConnectionFailure(error: unknown): boolean {
+  const name = error && typeof error === "object" && "name" in error ? String((error as { name: string }).name) : "";
+  if (name.startsWith("Mongo") || name === "MongoError") {
+    return true;
+  }
+  if (error instanceof Error) {
+    const m = error.message;
+    if (/MONGODB_URI not set/i.test(m)) {
+      return true;
+    }
+    if (/getaddrinfo|ECONNREFUSED|ENOTFOUND|ETIMEDOUT|IP whitelist|not allowed|network|socket|SSL|tls|authentication failed/i.test(m)) {
+      return true;
+    }
+  }
+  return false;
 }

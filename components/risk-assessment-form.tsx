@@ -204,6 +204,7 @@ function MetricField({
   step?: number;
   wizardStep: MetricWizardStep;
 }) {
+  /** Isolated per field: own ref/unlock state and a distinct RHF name (`id`). */
   const [autofillUnlocked, setAutofillUnlocked] = useState(false);
   const inputId = `assessment-metric-${wizardStep}-${id}`;
 
@@ -221,6 +222,7 @@ function MetricField({
         data-1p-ignore
         data-form-type="other"
         data-lpignore="true"
+        data-metric={id}
         id={inputId}
         inputMode={inputMode}
         placeholder={placeholder}
@@ -288,8 +290,10 @@ export function RiskAssessmentForm() {
     setError,
     trigger,
   } = useForm<RiskFormValues>({
-    resolver: zodResolver(riskAssessmentSchema) as Resolver<RiskFormValues>,
     defaultValues: EMPTY_FORM_DEFAULTS,
+    resolver: zodResolver(riskAssessmentSchema) as Resolver<RiskFormValues>,
+    // Keep one value per field name; step views mount/unmount without merging fields.
+    shouldUnregister: false,
   });
 
   const isReviewStep = currentStep === reviewStepIndex;
@@ -512,38 +516,44 @@ export function RiskAssessmentForm() {
           title={currentStepConfig.title}
         >
           <div className="grid gap-5 md:grid-cols-2">
-            <MetricField
-              description={p.ageDescription}
-              error={errors.age?.message}
-              id="age"
-              inputMode="numeric"
-              label={f.age.label}
-              placeholder={ph.age}
-              register={register}
-              wizardStep="profile"
-            />
-            <MetricField
-              description={p.pregnanciesDescription}
-              error={errors.pregnancies?.message}
-              id="pregnancies"
-              inputMode="numeric"
-              label={f.pregnancies.label}
-              placeholder={ph.pregnancies}
-              register={register}
-              wizardStep="profile"
-            />
-            <MetricField
-              description={p.bmiDescription}
-              error={errors.bmi?.message}
-              id="bmi"
-              label={f.bmi.label}
-              normalRange={nr.bmi}
-              normalRangePrefix={nr.prefix}
-              placeholder={ph.bmi}
-              register={register}
-              step={0.1}
-              wizardStep="profile"
-            />
+            <div key="age" className="contents">
+              <MetricField
+                description={p.ageDescription}
+                error={errors.age?.message}
+                id="age"
+                inputMode="numeric"
+                label={f.age.label}
+                placeholder={ph.age}
+                register={register}
+                wizardStep="profile"
+              />
+            </div>
+            <div key="pregnancies" className="contents">
+              <MetricField
+                description={p.pregnanciesDescription}
+                error={errors.pregnancies?.message}
+                id="pregnancies"
+                inputMode="numeric"
+                label={f.pregnancies.label}
+                placeholder={ph.pregnancies}
+                register={register}
+                wizardStep="profile"
+              />
+            </div>
+            <div key="bmi" className="contents">
+              <MetricField
+                description={p.bmiDescription}
+                error={errors.bmi?.message}
+                id="bmi"
+                label={f.bmi.label}
+                normalRange={nr.bmi}
+                normalRangePrefix={nr.prefix}
+                placeholder={ph.bmi}
+                register={register}
+                step={0.1}
+                wizardStep="profile"
+              />
+            </div>
             <div className="rounded-[28px] border border-white/10 bg-slate-950/45 p-5 shadow-[0_16px_40px_rgba(2,6,23,0.24)]">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-200">
                 <Ruler className="h-5 w-5" />
@@ -569,28 +579,32 @@ export function RiskAssessmentForm() {
           title={currentStepConfig.title}
         >
           <div className="grid gap-5 md:grid-cols-2">
-            <MetricField
-              description={l.glucoseDescription}
-              error={errors.glucose?.message}
-              id="glucose"
-              label={f.glucose.label}
-              normalRange={nr.glucose}
-              normalRangePrefix={nr.prefix}
-              placeholder={ph.glucose}
-              register={register}
-              wizardStep="labs"
-            />
-            <MetricField
-              description={l.bloodPressureDescription}
-              error={errors.bloodPressure?.message}
-              id="bloodPressure"
-              label={f.bloodPressure.label}
-              normalRange={nr.bloodPressure}
-              normalRangePrefix={nr.prefix}
-              placeholder={ph.bloodPressure}
-              register={register}
-              wizardStep="labs"
-            />
+            <div key="glucose" className="contents">
+              <MetricField
+                description={l.glucoseDescription}
+                error={errors.glucose?.message}
+                id="glucose"
+                label={f.glucose.label}
+                normalRange={nr.glucose}
+                normalRangePrefix={nr.prefix}
+                placeholder={ph.glucose}
+                register={register}
+                wizardStep="labs"
+              />
+            </div>
+            <div key="bloodPressure" className="contents">
+              <MetricField
+                description={l.bloodPressureDescription}
+                error={errors.bloodPressure?.message}
+                id="bloodPressure"
+                label={f.bloodPressure.label}
+                normalRange={nr.bloodPressure}
+                normalRangePrefix={nr.prefix}
+                placeholder={ph.bloodPressure}
+                register={register}
+                wizardStep="labs"
+              />
+            </div>
           </div>
         </StepCard>
       );
@@ -608,29 +622,33 @@ export function RiskAssessmentForm() {
         >
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="grid gap-5 md:grid-cols-2">
-              <MetricField
-                description={m.skinDescription}
-                error={errors.skinThickness?.message}
-                id="skinThickness"
-                label={f.skinThickness.label}
-                normalRange={nr.skinThickness}
-                normalRangePrefix={nr.prefix}
-                placeholder={ph.skinThickness}
-                register={register}
-                wizardStep="measurements"
-              />
-              <MetricField
-                description={m.insulinDescription}
-                error={errors.insulin?.message}
-                id="insulin"
-                label={f.insulin.label}
-                normalRange={nr.insulin}
-                normalRangePrefix={nr.prefix}
-                placeholder={ph.insulin}
-                register={register}
-                wizardStep="measurements"
-              />
-              <div className="md:col-span-2">
+              <div key="skinThickness" className="contents">
+                <MetricField
+                  description={m.skinDescription}
+                  error={errors.skinThickness?.message}
+                  id="skinThickness"
+                  label={f.skinThickness.label}
+                  normalRange={nr.skinThickness}
+                  normalRangePrefix={nr.prefix}
+                  placeholder={ph.skinThickness}
+                  register={register}
+                  wizardStep="measurements"
+                />
+              </div>
+              <div key="insulin" className="contents">
+                <MetricField
+                  description={m.insulinDescription}
+                  error={errors.insulin?.message}
+                  id="insulin"
+                  label={f.insulin.label}
+                  normalRange={nr.insulin}
+                  normalRangePrefix={nr.prefix}
+                  placeholder={ph.insulin}
+                  register={register}
+                  wizardStep="measurements"
+                />
+              </div>
+              <div className="md:col-span-2" key="diabetesPedigreeFunction">
                 <MetricField
                   description={m.dpfDescription}
                   error={errors.diabetesPedigreeFunction?.message}
@@ -835,7 +853,7 @@ export function RiskAssessmentForm() {
         </div>
       ) : (
         <form autoComplete="off" className="mt-6 space-y-6" onSubmit={onSubmit}>
-          {renderStepContent()}
+          <div key={currentStep}>{renderStepContent()}</div>
 
           {serverError ? (
             <div className="rounded-[28px] border border-rose-400/25 bg-rose-500/10 p-4 text-sm leading-6 text-rose-100">
@@ -873,7 +891,7 @@ export function RiskAssessmentForm() {
                 >
                   {currentStep === 0
                     ? a.startAssessment
-                    : currentStep === 3
+                    : currentStep + 1 === reviewStepIndex
                       ? a.reviewInputs
                       : a.continue}
                   <ChevronRight className="h-4 w-4" />

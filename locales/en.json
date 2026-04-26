@@ -81,7 +81,8 @@
     "export": {
       "noDb": "Database is not configured (MONGODB_URI is missing).",
       "noToken": "CSV export is disabled until RISK_CSV_EXPORT_TOKEN is set in the environment.",
-      "unauthorized": "Invalid or missing export token. Use ?token=… or X-Export-Token / Authorization: Bearer."
+      "unauthorized": "Invalid or missing export token. Use ?token=… or X-Export-Token / Authorization: Bearer.",
+      "connectionFailed": "Could not connect to the database from this server. In MongoDB Atlas, Network Access must allow the host running this app (for Vercel, allow 0.0.0.0/0 or your deployment’s egress IPs). Ensure Vercel has the environment variable MONGODB_URI (exact name) and redeploy after changes."
     }
   },
   "form": {

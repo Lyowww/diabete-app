@@ -2,7 +2,7 @@ import "server-only";
 
 import { ObjectId } from "mongodb";
 
-import { getMongoClient, getMongoDb } from "@/lib/mongodb";
+import { getMongoClient, getMongoDb, withMongoConnectionRetry } from "@/lib/mongodb";
 import { RISK_ASSESSMENTS_COLLECTION } from "@/lib/persist-assessment";
 import type { PredictionResult, RiskAssessmentInput } from "@/types/prediction";
 
@@ -63,23 +63,25 @@ function rowFromDocument(doc: StoredAssessment): string {
 }
 
 export async function getRiskAssessmentsCsvString(): Promise<{ csv: string; rowCount: number }> {
-  const client = getMongoClient();
-  if (!client) {
-    throw new Error("MONGODB_URI not set");
-  }
+  return withMongoConnectionRetry(async () => {
+    const client = getMongoClient();
+    if (!client) {
+      throw new Error("MONGODB_URI not set");
+    }
 
-  const db = getMongoDb();
-  if (!db) {
-    throw new Error("MONGODB_URI not set");
-  }
+    const db = getMongoDb();
+    if (!db) {
+      throw new Error("MONGODB_URI not set");
+    }
 
-  await client.connect();
-  const collection = db.collection<StoredAssessment>(RISK_ASSESSMENTS_COLLECTION);
-  const documents = await collection.find().sort({ storedAt: -1 }).toArray();
+    await client.connect();
+    const collection = db.collection<StoredAssessment>(RISK_ASSESSMENTS_COLLECTION);
+    const documents = await collection.find().sort({ storedAt: -1 }).toArray();
 
-  const header = COLUMNS.map((c) => c.key).join(",");
-  const body = documents.map((doc) => rowFromDocument(doc)).join("\r\n");
-  const csv = [header, body].filter((part) => part.length > 0).join("\r\n");
+    const header = COLUMNS.map((c) => c.key).join(",");
+    const body = documents.map((doc) => rowFromDocument(doc)).join("\r\n");
+    const csv = [header, body].filter((part) => part.length > 0).join("\r\n");
 
-  return { csv, rowCount: documents.length };
+    return { csv, rowCount: documents.length };
+  });
 }
