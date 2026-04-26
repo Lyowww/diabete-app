@@ -1,12 +1,12 @@
 {
   "layout": {
     "title": "DiaVision | Diabetes Risk Predictor",
-    "description": "A secure, data-driven diabetes risk assessment tool providing patient-friendly insights and statistical estimates."
+    "description": "A secure, user-friendly diabetes risk assessment tool utilizing advanced statistical models to provide personalized insights."
   },
   "page": {
     "badge": "Secure & private health screening",
     "heading": "DiaVision - Diabetes Risk Predictor",
-    "intro": "This tool helps evaluate your potential risk for developing type 2 diabetes based on statistical models. It is strictly for informational purposes and does NOT replace professional medical diagnosis, testing, or consultation."
+    "intro": "This tool evaluates your potential risk for developing type 2 diabetes using an advanced statistical approach. By analyzing the complex, real-world relationships between your different health metrics, it provides a highly personalized risk estimate. Please remember: this tool is strictly for educational purposes and does NOT replace professional medical diagnosis, testing, or consultation."
   },
   "highlights": {
     "simple": {
@@ -22,8 +22,8 @@
       "copy": "Your health data is processed securely in real-time. We do not store or share your sensitive medical information."
     },
     "comprehensive": {
-      "title": "Analytical Overview",
-      "copy": "The predictive model evaluates how multiple physiological factors interact to provide a holistic view of your current risk profile."
+      "title": "Advanced Algorithm",
+      "copy": "Unlike standard calculators, our predictive model evaluates exactly how your multiple physiological factors interact together, giving you a much more holistic view of your health."
     }
   },
   "disclaimer": {
@@ -95,11 +95,11 @@
         "shortLabel": "Start",
         "eyebrow": "Step 1",
         "title": "Preliminary Health Screening",
-        "description": "Take a few minutes to complete this questionnaire. Remember, this provides a statistical estimate and does not serve as a clinical evaluation.",
+        "description": "Take a few minutes to complete this questionnaire. Remember, this provides a statistical estimate using advanced data analysis and does not serve as a clinical evaluation.",
         "cards": {
           "quick": { "title": "Efficient", "copy": "Input your basic physiological metrics and latest fasting lab results." },
-          "smart": { "title": "Algorithmic Analysis", "copy": "Our model processes your inputs to generate a personalized risk probability." },
-          "holistic": { "title": "Multivariate Approach", "copy": "Observe how metrics like BMI, age, and blood glucose interact simultaneously." }
+          "smart": { "title": "Smart Algorithm", "copy": "Our model processes your inputs to generate a personalized risk probability based on complex data relationships." },
+          "holistic": { "title": "Multivariate Approach", "copy": "Observe how metrics like BMI, age, and blood glucose interact simultaneously rather than one by one." }
         },
         "tipsTitle": "Guidelines for Accuracy",
         "tips": [
@@ -141,7 +141,7 @@
         "insulinDescription": "2-Hour serum insulin. Enter 0 if unknown.",
         "dpfDescription": "Diabetes pedigree function (usually 0.1 to 1.5).",
         "asideMissing": { "title": "Missing Information?", "copy": "If you do not have certain lab values, enter 0. The algorithm will automatically adjust using standard population means." },
-        "asideConnecting": { "title": "Multivariate Correlation", "copy": "The system evaluates the non-linear relationships between all these variables rather than looking at any single metric in isolation." }
+        "asideConnecting": { "title": "Connecting the Dots", "copy": "Unlike basic calculators, our system evaluates the hidden dependencies between all your metrics, giving you a much smarter risk profile." }
       },
       "review": {
         "label": "Review",
@@ -167,7 +167,7 @@
         "whatNext": "Next Steps",
         "nextSteps": [
           "The system will validate your inputs.",
-          "Your data will be processed through our predictive copula-based model.",
+          "Your data will be processed through our predictive statistical model.",
           "A customized risk probability report will be generated."
         ],
         "reviewFooter": "Final Reminder: These statistical insights are intended to facilitate discussions with your physician, not to diagnose any medical condition."
@@ -177,7 +177,7 @@
         "shortLabel": "Result",
         "eyebrow": "Step 6",
         "title": "Predictive Risk Overview",
-        "description": "Below is the statistical estimate of your type 2 diabetes risk based on the provided metrics."
+        "description": "Below is the statistical estimate of your type 2 diabetes risk based on the provided metrics and their complex interactions."
       }
     },
     "fields": {
